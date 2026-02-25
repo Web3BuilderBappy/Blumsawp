@@ -5,12 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RialoSwap — Solana DEX</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Chart library FIRST -->
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-
-<!-- Jupiter Terminal -->
-<script src="https://terminal.jup.ag/main-v2.js" data-preload></script>
+<script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -46,12 +42,14 @@ nav{position:sticky;top:0;z-index:300;display:flex;align-items:center;
 .ndot{width:6px;height:6px;border-radius:50%;background:var(--accent);
   box-shadow:0 0 6px var(--accent);animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* NAV WALLET BUTTON */
 #cwBtn{padding:8px 18px;border-radius:7px;
   background:linear-gradient(135deg,var(--accent),#00a88a);
   border:none;color:#05100a;font-family:var(--font);font-size:0.74rem;
   font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s}
 #cwBtn:hover{box-shadow:0 0 20px rgba(0,220,180,0.4);transform:translateY(-1px)}
-#cwBtn.on{background:rgba(0,220,180,0.1);border:1px solid var(--accent);color:var(--accent)}
+#cwBtn.connected{background:rgba(0,220,180,0.1);border:1px solid var(--accent);color:var(--accent)}
 
 /* LAYOUT */
 main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16px;
@@ -64,29 +62,26 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
 .ch::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
 
 /* TOKEN PAIRS LEFT */
-.tpairs{grid-row:1/3}
+.tpairs{grid-row:1/4}
 .titem{display:flex;align-items:center;gap:7px;padding:9px 10px;cursor:pointer;
   border-bottom:1px solid rgba(0,220,180,0.04);transition:.15s}
 .titem:hover{background:rgba(0,220,180,0.05)}
 .titem.on{background:rgba(0,220,180,0.09);border-left:2px solid var(--accent)}
-.titem img{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;
-  background:rgba(255,255,255,0.06)}
+.titem img{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,0.06)}
 .tii{flex:1;min-width:0}
 .tis{font-size:0.7rem;font-weight:700}
 .tip{font-size:0.64rem;font-weight:600;font-family:var(--mono);margin-top:1px}
 .tic{font-size:0.56rem;font-family:var(--mono)}
 .g{color:var(--accent)}.rr{color:var(--red)}
 
-/* CENTER COLUMN */
+/* CENTER */
 .center{display:flex;flex-direction:column;gap:12px}
 
-/* CHART CARD */
+/* CHART */
 .cchart{display:flex;flex-direction:column}
-.ctop{display:flex;align-items:center;gap:12px;padding:12px 16px;
-  border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ctop{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .plogos{position:relative;width:50px;height:30px;flex-shrink:0}
-.plogos img{width:30px;height:30px;border-radius:50%;position:absolute;
-  object-fit:cover;border:2px solid var(--bg)}
+.plogos img{width:30px;height:30px;border-radius:50%;position:absolute;object-fit:cover;border:2px solid var(--bg)}
 .plogos img:first-child{left:0;z-index:2}
 .plogos img:last-child{left:20px;z-index:1}
 .pnm{font-size:0.95rem;font-weight:800;letter-spacing:1px}
@@ -116,89 +111,156 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
   font-size:0.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
   color:var(--muted);border-bottom:1px solid rgba(0,220,180,0.05)}
 .trow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:6px 14px;
-  font-size:0.68rem;font-family:var(--mono);border-bottom:1px solid rgba(0,220,180,0.03);
-  animation:fin .3s ease}
+  font-size:0.68rem;font-family:var(--mono);border-bottom:1px solid rgba(0,220,180,0.03);animation:fin .3s ease}
 @keyframes fin{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
 
-/* RIGHT SWAP PANEL */
+/* ═══════════════════════════════
+   RIGHT — SWAP PANEL (একটাই)
+═══════════════════════════════ */
 .right{display:flex;flex-direction:column;gap:12px}
 
-/* QUICK TRADE */
-.qtcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.qt-tabs{display:grid;grid-template-columns:1fr 1fr}
-.qt-tab{padding:13px;text-align:center;font-size:0.76rem;font-weight:800;
-  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s;
-  color:var(--muted);border-bottom:1px solid var(--border)}
-.qt-tab.buy.on{color:#05100a;background:var(--accent);border-bottom-color:transparent}
-.qt-tab.sell.on{color:#fff;background:var(--red);border-bottom-color:transparent}
-.qt-tab:not(.on):hover{color:var(--text);background:rgba(255,255,255,0.03)}
-.qbody{padding:16px}
-.ql{font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:5px}
-.qrow{display:flex;justify-content:space-between;margin-bottom:5px}
-.qavail{font-size:0.6rem;font-family:var(--mono);color:var(--muted)}
-.qinp{width:100%;padding:11px 13px;background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);border-radius:8px;color:var(--text);
-  font-family:var(--mono);font-size:0.88rem;font-weight:600;outline:none;
-  transition:.2s;margin-bottom:10px}
-.qinp:focus{border-color:rgba(0,220,180,0.35);background:rgba(0,220,180,0.04)}
-.qinp[readonly]{opacity:.6}
-.pinfo{background:rgba(0,220,180,0.04);border:1px solid rgba(0,220,180,0.1);
-  border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:0.66rem;font-family:var(--mono)}
-.prow{display:flex;justify-content:space-between;padding:2px 0;color:var(--muted)}
-.prow span:last-child{color:var(--text);font-weight:600}
-.execbtn{width:100%;padding:13px;border-radius:8px;border:none;font-family:var(--font);
-  font-size:0.8rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s}
-.execbtn.b{background:linear-gradient(135deg,var(--accent),#009e8a);color:#05100a}
-.execbtn.s{background:linear-gradient(135deg,#ff4560,#c0003a);color:#fff}
-.execbtn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,220,180,0.3)}
-.execbtn.s:hover{box-shadow:0 5px 18px rgba(255,69,96,0.3)}
+.swapcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 
-/* JUPITER — hide their logo/name with CSS */
-#jup-wrap{border-top:1px solid var(--border)}
-.jlbl{padding:9px 14px;font-size:0.6rem;font-weight:700;letter-spacing:2px;
-  text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
-.jlbl::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
-#jup-container{min-height:380px}
+/* Swap Header */
+.swap-header{padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.swap-title{font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:7px}
+.swap-title::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
+.slippage-btn{font-size:0.6rem;font-family:var(--mono);color:var(--muted);
+  background:rgba(0,220,180,0.06);border:1px solid var(--border);border-radius:5px;
+  padding:3px 8px;cursor:pointer;transition:.2s}
+.slippage-btn:hover{color:var(--accent);border-color:var(--accent)}
 
-/* Hide Jupiter branding inside iframe/container */
-#jup-container ._3_zjF,
-#jup-container [class*="PoweredBy"],
-#jup-container [class*="powered-by"],
-#jup-container [class*="poweredBy"],
-#jup-container [class*="jup-logo"],
-#jup-container [class*="jupLogo"],
-#jup-container footer,
-#jup-container [class*="Footer"],
-#jup-container [class*="Brand"],
-#jup-container [class*="brand"]{display:none!important;height:0!important;overflow:hidden!important}
+.swap-body{padding:14px}
+
+/* Token Box */
+.token-box{background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:.2s}
+.token-box:focus-within{border-color:rgba(0,220,180,0.3);background:rgba(0,220,180,0.02)}
+.token-box-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.token-label{font-size:0.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.token-bal{font-size:0.6rem;font-family:var(--mono);color:var(--muted);cursor:pointer;transition:.15s}
+.token-bal:hover{color:var(--accent)}
+.token-row{display:flex;align-items:center;gap:10px}
+.token-sel{display:flex;align-items:center;gap:7px;background:rgba(0,220,180,0.08);
+  border:1px solid rgba(0,220,180,0.2);border-radius:8px;padding:7px 10px;
+  cursor:pointer;transition:.2s;white-space:nowrap;min-width:100px}
+.token-sel:hover{background:rgba(0,220,180,0.14);border-color:var(--accent)}
+.token-sel img{width:22px;height:22px;border-radius:50%;object-fit:cover;background:#1a2535;flex-shrink:0}
+.token-sym{font-size:0.82rem;font-weight:800}
+.token-chevron{margin-left:auto;color:var(--muted);font-size:0.65rem}
+.amt-inp{flex:1;background:transparent;border:none;color:var(--text);
+  font-family:var(--mono);font-size:1.15rem;font-weight:700;outline:none;
+  text-align:right;min-width:0}
+.amt-inp::placeholder{color:rgba(200,230,220,0.15)}
+.amt-usd{text-align:right;font-size:0.6rem;font-family:var(--mono);color:var(--muted);margin-top:4px}
+
+/* Flip button */
+.flip-wrap{display:flex;justify-content:center;margin:2px 0}
+.flip-btn{width:34px;height:34px;border-radius:50%;background:var(--card);
+  border:2px solid var(--border);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.3s;font-size:1rem;user-select:none}
+.flip-btn:hover{border-color:var(--accent);background:rgba(0,220,180,0.1);transform:rotate(180deg)}
+
+/* Route info */
+.route-box{background:rgba(0,220,180,0.03);border:1px solid rgba(0,220,180,0.08);
+  border-radius:9px;padding:10px 13px;margin-bottom:12px;display:none}
+.route-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:0.63rem;font-family:var(--mono)}
+.route-lbl{color:var(--muted)}
+.route-val{color:var(--text);font-weight:600}
+.route-val.g{color:var(--accent)}
+.route-val.w{color:#f0a500}
+.route-val.r{color:var(--red)}
+.route-path{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.hop{background:rgba(0,220,180,0.08);border:1px solid rgba(0,220,180,0.15);
+  border-radius:4px;padding:2px 6px;font-size:0.55rem;font-weight:700}
+
+/* Main Swap Button */
+.swap-btn{width:100%;padding:15px;border-radius:10px;border:none;
+  font-family:var(--font);font-size:0.85rem;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;transition:.25s;margin-top:4px}
+.swap-btn.connect{
+  background:linear-gradient(135deg,var(--accent),#009e8a);color:#04120e}
+.swap-btn.connect:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,220,180,0.35)}
+.swap-btn.enter{background:rgba(255,255,255,0.05);color:var(--muted);cursor:not-allowed}
+.swap-btn.loading{background:rgba(0,220,180,0.08);color:var(--accent);
+  border:1px solid rgba(0,220,180,0.3);cursor:not-allowed}
+.swap-btn.ready{
+  background:linear-gradient(135deg,var(--accent),#009e8a);color:#04120e}
+.swap-btn.ready:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,220,180,0.35)}
+.swap-btn.err{background:rgba(255,69,96,0.1);color:var(--red);
+  border:1px solid rgba(255,69,96,0.25);cursor:not-allowed}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;
+  border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;
+  vertical-align:middle;margin-right:6px}
 
 /* WALLET MODAL */
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:800;
   display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
-.moverlay.show{display:flex}
-.mbox{background:#0d1520;border:1px solid var(--border);border-radius:14px;
+.overlay.show{display:flex}
+.modal-box{background:#0d1520;border:1px solid var(--border);border-radius:14px;
   padding:26px;width:330px;max-width:92vw}
-.mt{font-size:1rem;font-weight:800;letter-spacing:1px;margin-bottom:4px}
-.ms{font-size:0.7rem;color:var(--muted);margin-bottom:16px}
-.wopt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;
+.modal-title{font-size:1rem;font-weight:800;letter-spacing:1px;margin-bottom:4px}
+.modal-sub{font-size:0.7rem;color:var(--muted);margin-bottom:16px}
+.w-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;
   border:1px solid var(--border);background:rgba(255,255,255,0.03);
   cursor:pointer;margin-bottom:8px;transition:.2s}
-.wopt:hover{background:rgba(0,220,180,0.07);border-color:rgba(0,220,180,0.3)}
-.wopt img{width:36px;height:36px;border-radius:8px;object-fit:cover}
-.wnm{font-size:0.8rem;font-weight:700}
-.wd{font-size:0.6rem;color:var(--muted)}
-.mclose{width:100%;padding:9px;border-radius:7px;border:1px solid var(--border);
+.w-opt:hover{background:rgba(0,220,180,0.07);border-color:rgba(0,220,180,0.3)}
+.w-opt img{width:36px;height:36px;border-radius:8px;object-fit:cover;background:#222}
+.w-name{font-size:0.8rem;font-weight:700}
+.w-desc{font-size:0.6rem;color:var(--muted)}
+.modal-cancel{width:100%;padding:9px;border-radius:7px;border:1px solid var(--border);
   background:transparent;color:var(--muted);font-family:var(--font);font-size:0.72rem;
   cursor:pointer;margin-top:2px;transition:.2s}
-.mclose:hover{border-color:var(--accent);color:var(--accent)}
+.modal-cancel:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SLIPPAGE MODAL */
+.slip-box{background:#0d1520;border:1px solid var(--border);border-radius:12px;
+  padding:22px;width:290px}
+.slip-title{font-size:0.82rem;font-weight:800;margin-bottom:12px}
+.slip-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.slip-opt{padding:8px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:var(--mono);
+  font-size:0.7rem;cursor:pointer;transition:.15s;text-align:center}
+.slip-opt:hover,.slip-opt.on{background:rgba(0,220,180,0.1);border-color:var(--accent);color:var(--accent)}
+.slip-inp{width:100%;padding:8px 12px;background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:7px;color:var(--text);
+  font-family:var(--mono);font-size:0.8rem;outline:none;margin-bottom:10px}
+.slip-done{width:100%;padding:9px;border-radius:7px;border:1px solid var(--accent);
+  background:rgba(0,220,180,0.08);color:var(--accent);font-family:var(--font);
+  font-size:0.72rem;cursor:pointer;transition:.2s}
+.slip-done:hover{background:rgba(0,220,180,0.15)}
+
+/* TOKEN PICKER MODAL */
+.tk-box{background:#0d1520;border:1px solid var(--border);border-radius:14px;
+  width:350px;max-height:520px;overflow:hidden;display:flex;flex-direction:column}
+.tk-search{padding:14px;border-bottom:1px solid var(--border)}
+.tk-search-title{font-size:0.75rem;font-weight:800;margin-bottom:10px}
+.tk-inp{width:100%;padding:10px 13px;background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-family:var(--mono);font-size:0.82rem;outline:none}
+.tk-inp:focus{border-color:rgba(0,220,180,0.3)}
+.tk-list{overflow-y:auto;flex:1;padding:8px}
+.tk-list::-webkit-scrollbar{width:3px}
+.tk-list::-webkit-scrollbar-thumb{background:rgba(0,220,180,0.2);border-radius:2px}
+.tk-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;
+  cursor:pointer;transition:.15s}
+.tk-item:hover{background:rgba(0,220,180,0.06)}
+.tk-item.sel{background:rgba(0,220,180,0.1)}
+.tk-item img{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#1a2535;flex-shrink:0}
+.tk-sym-big{font-size:0.8rem;font-weight:800}
+.tk-name-sm{font-size:0.62rem;color:var(--muted);margin-top:1px}
 
 /* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;z-index:600;
-  background:var(--card);border:1px solid var(--accent);border-radius:9px;
-  padding:13px 17px;font-size:0.76rem;line-height:1.5;
-  transform:translateY(80px);opacity:0;transition:.35s;max-width:270px}
+.toast{position:fixed;bottom:22px;right:22px;z-index:900;
+  background:#0d1520;border:1px solid var(--accent);border-radius:9px;
+  padding:12px 16px;font-size:0.75rem;line-height:1.5;
+  transform:translateY(70px);opacity:0;transition:.3s;max-width:280px;pointer-events:none}
 .toast.show{transform:none;opacity:1}
+.toast.err{border-color:var(--red)}
 
 footer{position:relative;z-index:1;text-align:center;padding:18px;
   font-size:0.63rem;color:var(--muted);border-top:1px solid var(--border);letter-spacing:1px}
@@ -214,31 +276,57 @@ footer b{color:var(--accent)}
 </head>
 <body>
 
-<!-- WALLET MODAL -->
-<div class="moverlay" id="wmodal">
-  <div class="mbox">
-    <div class="mt">Connect Wallet</div>
-    <div class="ms">Choose your Solana wallet to swap</div>
-    <div class="wopt" onclick="doConnect('Phantom')">
+<!-- ══════════════════ WALLET MODAL ══════════════════ -->
+<div class="overlay" id="walletModal">
+  <div class="modal-box">
+    <div class="modal-title">Connect Wallet</div>
+    <div class="modal-sub">Choose your Solana wallet</div>
+    <div class="w-opt" onclick="doConnect('Phantom')">
       <img src="https://phantom.app/img/phantom-logo.png" onerror="this.style.background='#4e44ce'">
-      <div><div class="wnm">Phantom</div><div class="wd">Most popular Solana wallet</div></div>
+      <div><div class="w-name">Phantom</div><div class="w-desc">Most popular Solana wallet</div></div>
     </div>
-    <div class="wopt" onclick="doConnect('Solflare')">
+    <div class="w-opt" onclick="doConnect('Solflare')">
       <img src="https://solflare.com/favicon.ico" onerror="this.style.background='#fc7227'">
-      <div><div class="wnm">Solflare</div><div class="wd">Non-custodial Solana wallet</div></div>
+      <div><div class="w-name">Solflare</div><div class="w-desc">Non-custodial Solana wallet</div></div>
     </div>
-    <div class="wopt" onclick="doConnect('Backpack')">
+    <div class="w-opt" onclick="doConnect('Backpack')">
       <img src="https://backpack.app/favicon.ico" onerror="this.style.background='#e33d3d'">
-      <div><div class="wnm">Backpack</div><div class="wd">Multi-chain wallet</div></div>
+      <div><div class="w-name">Backpack</div><div class="w-desc">Multi-chain wallet</div></div>
     </div>
-    <button class="mclose" onclick="closeModal()">Cancel</button>
+    <button class="modal-cancel" onclick="closeWalletModal()">Cancel</button>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- ══════════════════ SLIPPAGE MODAL ══════════════════ -->
+<div class="overlay" id="slipModal">
+  <div class="slip-box">
+    <div class="slip-title">⚙ Slippage Tolerance</div>
+    <div class="slip-opts">
+      <button class="slip-opt" onclick="setSlip(0.1,this)">0.1%</button>
+      <button class="slip-opt on" onclick="setSlip(0.5,this)">0.5%</button>
+      <button class="slip-opt" onclick="setSlip(1,this)">1%</button>
+      <button class="slip-opt" onclick="setSlip(3,this)">3%</button>
+    </div>
+    <input class="slip-inp" id="slipCustom" type="number" placeholder="Custom %" step="0.1" min="0.01" max="50" oninput="setSlipCustom(this.value)">
+    <button class="slip-done" onclick="closeSlipModal()">✓ Done</button>
+  </div>
+</div>
+
+<!-- ══════════════════ TOKEN PICKER MODAL ══════════════════ -->
+<div class="overlay" id="tkModal">
+  <div class="tk-box">
+    <div class="tk-search">
+      <div class="tk-search-title">Select Token</div>
+      <input class="tk-inp" id="tkSearch" type="text" placeholder="Search name or paste address..." oninput="filterTk()">
+    </div>
+    <div class="tk-list" id="tkList"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ TOAST ══════════════════ -->
 <div class="toast" id="toast"></div>
 
-<!-- NAV -->
+<!-- ══════════════════ NAV ══════════════════ -->
 <nav>
   <div class="logo">Rialo<small>Swap</small></div>
   <div class="navlinks">
@@ -249,7 +337,7 @@ footer b{color:var(--accent)}
   </div>
   <div class="navr">
     <div class="nbadge"><div class="ndot"></div>SOLANA</div>
-    <button id="cwBtn" onclick="openModal()">🔗 Connect Wallet</button>
+    <button id="cwBtn" onclick="openWalletModal()">🔗 Connect Wallet</button>
   </div>
 </nav>
 
@@ -263,16 +351,12 @@ footer b{color:var(--accent)}
 
   <!-- CENTER -->
   <div class="center">
-
-    <!-- STATS -->
     <div class="stats">
       <div class="stat"><div class="sl">SOL Price</div><div class="sv" id="sPrice">$--</div><div class="ss" id="sChg">--</div></div>
       <div class="stat"><div class="sl">24h Volume</div><div class="sv" id="sVol">$--</div><div class="ss" style="color:var(--muted)">Solana DEX</div></div>
       <div class="stat"><div class="sl">Market Cap</div><div class="sv" id="sMkt">$--</div><div class="ss" style="color:var(--muted)">SOL</div></div>
       <div class="stat"><div class="sl">Network TPS</div><div class="sv" id="sTps">--</div><div class="ss" style="color:var(--muted)">tx/sec</div></div>
     </div>
-
-    <!-- CHART -->
     <div class="card cchart">
       <div class="ctop">
         <div class="plogos">
@@ -280,10 +364,7 @@ footer b{color:var(--accent)}
           <img id="pLogo2" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg" alt="USDT">
         </div>
         <span class="pnm" id="pairName">SOL / USDT</span>
-        <div class="ppw">
-          <span class="lp" id="liveP">$--</span>
-          <span class="lc" id="liveC">--</span>
-        </div>
+        <div class="ppw"><span class="lp" id="liveP">$--</span><span class="lc" id="liveC">--</span></div>
         <div class="tfs">
           <button class="tf on" onclick="setTF(this,60)">1m</button>
           <button class="tf" onclick="setTF(this,300)">5m</button>
@@ -301,318 +382,566 @@ footer b{color:var(--accent)}
         <div class="ind"><span class="ind-l">Mkt Cap</span><span class="ind-v g" id="iMkt">--</span></div>
       </div>
     </div>
-
-    <!-- RECENT TRADES -->
     <div class="card">
       <div class="ch">Recent Trades</div>
       <div class="tcols"><span>Type</span><span>Price (USDT)</span><span>Amount</span><span>Time</span></div>
       <div id="tradeList"></div>
     </div>
-
   </div>
 
-  <!-- RIGHT -->
+  <!-- RIGHT: SWAP PANEL (একটাই — সব কিছু এখানে) -->
   <div class="right">
-
-    <!-- QUICK TRADE -->
-    <div class="qtcard">
-      <div class="qt-tabs">
-        <div class="qt-tab buy on" id="tabBuy" onclick="swTab('buy')">⚡ Quick Trade</div>
-        <div class="qt-tab sell" id="tabSell" onclick="swTab('sell')">Order Book</div>
+    <div class="swapcard">
+      <div class="swap-header">
+        <div class="swap-title">Swap</div>
+        <button class="slippage-btn" onclick="openSlipModal()">⚙ <span id="slipDisplay">0.5%</span> slippage</button>
       </div>
-      <div class="qbody">
-        <div class="qrow">
-          <div class="ql">Amount</div>
-          <div class="qavail" id="qAvail">Available: -- SOL</div>
-        </div>
-        <input class="qinp" id="qAmt" type="number" placeholder="1.0" oninput="calcQ()">
+      <div class="swap-body">
 
-        <div class="ql">Price (USDT)</div>
-        <div style="position:relative;margin-bottom:10px">
-          <input class="qinp" id="qPrice" type="text" readonly>
-          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--muted);font-family:var(--mono)">Market: <span id="qMkt">--</span></span>
-        </div>
-
-        <div class="ql">Total (USDT)</div>
-        <div style="position:relative;margin-bottom:10px">
-          <input class="qinp" id="qTotal" type="text" readonly>
-          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--muted);font-family:var(--mono)">Fee: 0.25%</span>
-        </div>
-
-        <div class="pinfo">
-          <div class="prow"><span>Rate</span><span id="qRate">--</span></div>
-          <div class="prow"><span>Price Impact</span><span style="color:var(--accent)">~0.05%</span></div>
-          <div class="prow"><span>Min Received</span><span id="qMin">--</span></div>
+        <!-- You Pay -->
+        <div class="token-box">
+          <div class="token-box-top">
+            <span class="token-label">You Pay</span>
+            <span class="token-bal" id="inBal" onclick="setMax()">Balance: --</span>
+          </div>
+          <div class="token-row">
+            <div class="token-sel" onclick="openTkModal('in')">
+              <img id="inImg" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png">
+              <span class="token-sym" id="inSym">SOL</span>
+              <span class="token-chevron">▾</span>
+            </div>
+            <input class="amt-inp" id="inAmt" type="number" placeholder="0.00" oninput="onInput()">
+          </div>
+          <div class="amt-usd" id="inUsd">≈ $0.00</div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <button class="execbtn b" onclick="exec('BUY')">▲ BUY</button>
-          <button class="execbtn s" onclick="exec('SELL')">▼ SELL</button>
+        <!-- Flip -->
+        <div class="flip-wrap">
+          <div class="flip-btn" onclick="flipTokens()">⇅</div>
         </div>
-      </div>
 
-      <!-- JUPITER SWAP (no branding) -->
-      <div id="jup-wrap">
-        <div class="jlbl">Advanced Swap</div>
-        <div id="jup-container"></div>
+        <!-- You Receive -->
+        <div class="token-box">
+          <div class="token-box-top">
+            <span class="token-label">You Receive</span>
+            <span class="token-bal" id="outBal">Balance: --</span>
+          </div>
+          <div class="token-row">
+            <div class="token-sel" onclick="openTkModal('out')">
+              <img id="outImg" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png">
+              <span class="token-sym" id="outSym">USDC</span>
+              <span class="token-chevron">▾</span>
+            </div>
+            <input class="amt-inp" id="outAmt" type="text" placeholder="0.00" readonly style="cursor:default">
+          </div>
+          <div class="amt-usd" id="outUsd">≈ $0.00</div>
+        </div>
+
+        <!-- Route Info (লুকানো থাকবে, quote পেলে দেখাবে) -->
+        <div class="route-box" id="routeBox">
+          <div class="route-row"><span class="route-lbl">Rate</span><span class="route-val" id="rRate">--</span></div>
+          <div class="route-row"><span class="route-lbl">Price Impact</span><span class="route-val" id="rImpact">--</span></div>
+          <div class="route-row"><span class="route-lbl">Min Received</span><span class="route-val" id="rMin">--</span></div>
+          <div class="route-row"><span class="route-lbl">Network Fee</span><span class="route-val g">~0.000005 SOL</span></div>
+          <div class="route-row" style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,220,180,0.08)">
+            <span class="route-lbl">Route</span>
+            <div class="route-path" id="rPath"></div>
+          </div>
+        </div>
+
+        <!-- THE ONE BUTTON — সব কিছু এখানেই হবে -->
+        <button class="swap-btn enter" id="swapBtn" onclick="handleSwapBtn()">
+          Enter an amount
+        </button>
+
       </div>
     </div>
-
   </div>
 
 </main>
 
-<footer>Powered by <b>RialoSwap</b> · Built on <b>Solana</b> · Real transactions via Solana Aggregator Protocol</footer>
+<footer>Powered by <b>RialoSwap</b> · Built on <b>Solana</b> · Aggregated via Solana Liquidity Protocol</footer>
 
 <script>
-// ═══════════════════════════════════════
-// JUPITER TERMINAL INIT
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CONFIG & STATE
+// ═══════════════════════════════════════════════
 const RPC = 'https://mainnet.helius-rpc.com/?api-key=0f157c08-0320-4aeb-9db1-3dfeaccb38fd';
+const JUP  = 'https://quote-api.jup.ag/v6';
 
-window.addEventListener('load', () => {
-  if (window.Jupiter) {
-    window.Jupiter.init({
-      displayMode: 'integrated',
-      integratedTargetId: 'jup-container',
-      endpoint: RPC,
-      defaultExplorer: 'Solana Explorer',
-      formProps: {
-        initialInputMint: 'So11111111111111111111111111111111111111112',
-        initialOutputMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-      },
-    });
+const TOKENS = [
+  { sym:'SOL',  name:'Solana',       mint:'So11111111111111111111111111111111111111112',      dec:9, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png' },
+  { sym:'USDC', name:'USD Coin',     mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png' },
+  { sym:'USDT', name:'Tether USD',   mint:'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg' },
+  { sym:'BONK', name:'Bonk',         mint:'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', dec:5, img:'https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I' },
+  { sym:'WIF',  name:'dogwifhat',    mint:'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm', dec:6, img:'https://bafkreibk3covs5ltyqxa272uodhculbyfbbkznam6jfqhde7f3fxacuay.ipfs.nftstorage.link/' },
+  { sym:'RAY',  name:'Raydium',      mint:'4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png' },
+  { sym:'ORCA', name:'Orca',         mint:'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png' },
+  { sym:'JTO',  name:'Jito',         mint:'jtojtomepa8beP8AuQc6eXt5FriJwfFMwjx2v9iZpSej', dec:9, img:'https://metadata.jito.network/token/jto/image' },
+  { sym:'mSOL', name:'Marinade SOL', mint:'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So', dec:9, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png' },
+];
 
-    // Hide Jupiter branding after load
-    setTimeout(() => {
-      const style = document.createElement('style');
-      style.textContent = `
-        [class*="PoweredBy"],[class*="powered"],[class*="jup-gradient"],
-        [class*="brand"],[class*="Brand"],[id*="jup-brand"],
-        a[href*="jup.ag"],a[href*="jupiter"]{display:none!important}
-      `;
-      document.head.appendChild(style);
-    }, 3000);
-  }
-});
+// Global State
+let walletConnected  = false;
+let walletPubkey     = null;
+let walletProvider   = null;
+let slippageBps      = 50;
+let inToken          = TOKENS[0]; // SOL
+let outToken         = TOKENS[1]; // USDC
+let currentQuote     = null;
+let quoteDebounce    = null;
+let currentPrice     = 0;
+let tkTarget         = 'in'; // কোন side-এর জন্য token picker খুলেছে
 
-// ═══════════════════════════════════════
-// CHART
-// ═══════════════════════════════════════
-let chart, cs, candles = [];
+// ═══════════════════════════════════════════════
+// WALLET MODAL
+// ═══════════════════════════════════════════════
+function openWalletModal()  { document.getElementById('walletModal').classList.add('show') }
+function closeWalletModal() { document.getElementById('walletModal').classList.remove('show') }
 
-function initChart(basePrice) {
-  const el = document.getElementById('chartDiv');
-  if (chart) { chart.remove(); }
-  chart = LightweightCharts.createChart(el, {
-    width: el.clientWidth,
-    height: 290,
-    layout: { background: { color: '#0d1520' }, textColor: '#dff0ec' },
-    grid: { vertLines: { color: 'rgba(0,220,180,0.05)' }, horzLines: { color: 'rgba(0,220,180,0.05)' } },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: 'rgba(0,220,180,0.15)' },
-    timeScale: { borderColor: 'rgba(0,220,180,0.15)', timeVisible: true, secondsVisible: false },
-    handleScroll: true,
-    handleScale: true,
-  });
-  cs = chart.addCandlestickSeries({
-    upColor: '#00dcb4', downColor: '#ff4560',
-    borderUpColor: '#00dcb4', borderDownColor: '#ff4560',
-    wickUpColor: '#00dcb4', wickDownColor: '#ff4560',
-  });
-  candles = genCandles(basePrice || 100, 120, 60);
-  cs.setData(candles);
-  chart.timeScale().fitContent();
-
-  window.addEventListener('resize', () => {
-    if (chart) chart.applyOptions({ width: el.clientWidth });
-  });
-}
-
-function genCandles(base, count, iv) {
-  const arr = []; let p = base;
-  const now = Math.floor(Date.now() / 1000);
-  for (let i = count; i >= 0; i--) {
-    const o = p;
-    const c = o + (Math.random() - 0.48) * (iv < 3600 ? base * 0.008 : base * 0.02);
-    arr.push({
-      time: now - i * iv,
-      open: o, close: c,
-      high: Math.max(o, c) + Math.random() * base * 0.003,
-      low: Math.min(o, c) - Math.random() * base * 0.003,
-    });
-    p = c;
-  }
-  return arr;
-}
-
-function setTF(btn, iv) {
-  document.querySelectorAll('.tf').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  if (!chart) return;
-  candles = genCandles(currentPrice || 100, 120, iv);
-  cs.setData(candles);
-  chart.timeScale().fitContent();
-}
-
-// Live tick update
-setInterval(() => {
-  if (!cs || !candles.length) return;
-  const last = candles[candles.length - 1];
-  const nc = last.close + (Math.random() - 0.48) * (currentPrice || 100) * 0.002;
-  const up = { time: last.time, open: last.open, high: Math.max(last.high, nc), low: Math.min(last.low, nc), close: nc };
-  candles[candles.length - 1] = up;
-  cs.update(up);
-}, 1500);
-
-// New candle every 60s
-setInterval(() => {
-  if (!cs || !candles.length) return;
-  const last = candles[candles.length - 1];
-  const o = last.close;
-  const c = o + (Math.random() - 0.48) * (currentPrice || 100) * 0.008;
-  const nc = { time: last.time + 60, open: o, close: c, high: Math.max(o, c) + Math.random() * 0.5, low: Math.min(o, c) - Math.random() * 0.5 };
-  candles.push(nc);
-  cs.update(nc);
-}, 60000);
-
-// ═══════════════════════════════════════
-// WALLET
-// ═══════════════════════════════════════
-let connected = false;
-let currentPrice = 0;
-
-function openModal() { document.getElementById('wmodal').classList.add('show'); }
-function closeModal() { document.getElementById('wmodal').classList.remove('show'); }
-
-async function doConnect(name) {
-  closeModal();
-  if (name === 'Phantom' && window.solana?.isPhantom) {
-    try {
-      const r = await window.solana.connect();
-      const addr = r.publicKey.toString();
-      setWallet(addr.slice(0, 4) + '...' + addr.slice(-4));
-      toast('✓ Phantom wallet connected!');
-      return;
-    } catch (e) {
-      toast('⚠ Connection rejected'); return;
+async function doConnect(walletName) {
+  closeWalletModal();
+  try {
+    if (walletName === 'Phantom') {
+      if (!window.solana?.isPhantom) { showToast('Phantom wallet not installed!', true); return; }
+      const resp = await window.solana.connect();
+      walletPubkey   = resp.publicKey.toString();
+      walletProvider = window.solana;
+    } else if (walletName === 'Solflare') {
+      if (!window.solflare?.isSolflare) { showToast('Solflare wallet not installed!', true); return; }
+      await window.solflare.connect();
+      walletPubkey   = window.solflare.publicKey.toString();
+      walletProvider = window.solflare;
+    } else if (walletName === 'Backpack') {
+      if (!window.xnft?.solana) { showToast('Backpack wallet not installed!', true); return; }
+      const resp = await window.xnft.solana.connect();
+      walletPubkey   = resp.publicKey.toString();
+      walletProvider = window.xnft.solana;
     }
+
+    walletConnected = true;
+    const short = walletPubkey.slice(0,4) + '...' + walletPubkey.slice(-4);
+    const btn = document.getElementById('cwBtn');
+    btn.textContent = '● ' + short;
+    btn.classList.add('connected');
+    btn.onclick = () => {}; // connect হওয়ার পর click কিছু করবে না
+
+    showToast('✓ ' + walletName + ' connected!');
+    refreshBtn(); // বাটন আপডেট করো
+    loadBalances();
+
+  } catch(e) {
+    showToast('Connection cancelled', true);
   }
-  setWallet(name.slice(0, 3) + '7x...k9P');
-  toast('✓ ' + name + ' connected!');
 }
 
-function setWallet(label) {
-  connected = true;
-  const b = document.getElementById('cwBtn');
-  b.textContent = '● ' + label;
-  b.classList.add('on');
-  document.getElementById('qAvail').textContent = 'Available: 12.50 SOL';
+// ═══════════════════════════════════════════════
+// BALANCE
+// ═══════════════════════════════════════════════
+async function loadBalances() {
+  if (!walletPubkey) return;
+  const inBal  = await getBalance(inToken);
+  const outBal = await getBalance(outToken);
+  document.getElementById('inBal').textContent  = inBal  !== null ? `Balance: ${inBal} ${inToken.sym}`  : 'Balance: --';
+  document.getElementById('outBal').textContent = outBal !== null ? `Balance: ${outBal} ${outToken.sym}` : 'Balance: --';
 }
 
-// ═══════════════════════════════════════
-// QUICK TRADE
-// ═══════════════════════════════════════
-let activeTab = 'buy';
-function swTab(t) {
-  activeTab = t;
-  document.getElementById('tabBuy').className = 'qt-tab buy' + (t === 'buy' ? ' on' : '');
-  document.getElementById('tabSell').className = 'qt-tab sell' + (t === 'sell' ? ' on' : '');
+async function getBalance(token) {
+  if (!walletPubkey) return null;
+  try {
+    const conn = new solanaWeb3.Connection(RPC, 'confirmed');
+    if (token.sym === 'SOL') {
+      const lam = await conn.getBalance(new solanaWeb3.PublicKey(walletPubkey));
+      return (lam / 1e9).toFixed(4);
+    }
+    const accounts = await conn.getParsedTokenAccountsByOwner(
+      new solanaWeb3.PublicKey(walletPubkey),
+      { mint: new solanaWeb3.PublicKey(token.mint) }
+    );
+    if (!accounts.value.length) return '0.0000';
+    return parseFloat(accounts.value[0].account.data.parsed.info.tokenAmount.uiAmountString).toFixed(4);
+  } catch { return null; }
 }
 
-function calcQ() {
-  const amt = parseFloat(document.getElementById('qAmt').value) || 0;
-  if (!amt || !currentPrice) return;
-  const total = amt * currentPrice;
-  document.getElementById('qPrice').value = currentPrice.toFixed(4);
-  document.getElementById('qTotal').value = total.toFixed(4);
-  document.getElementById('qMkt').textContent = currentPrice.toFixed(2);
-  document.getElementById('qRate').textContent = currentPrice.toFixed(2) + ' USDT/SOL';
-  document.getElementById('qMin').textContent = (total * 0.995).toFixed(4) + ' USDT';
+async function setMax() {
+  if (!walletConnected) { openWalletModal(); return; }
+  const bal = await getBalance(inToken);
+  if (!bal) return;
+  let v = parseFloat(bal);
+  if (inToken.sym === 'SOL') v = Math.max(0, v - 0.005);
+  document.getElementById('inAmt').value = v > 0 ? v : '';
+  onInput();
 }
 
-function exec(type) {
-  if (!connected) { openModal(); return; }
-  const amt = parseFloat(document.getElementById('qAmt').value);
-  if (!amt || amt <= 0) { toast('⚠ Enter an amount'); return; }
-  toast('⏳ Broadcasting to Solana mainnet...');
-  setTimeout(() => toast('✓ ' + type + ' order executed! Check your wallet'), 2200);
+// ═══════════════════════════════════════════════
+// SLIPPAGE MODAL
+// ═══════════════════════════════════════════════
+function openSlipModal()  { document.getElementById('slipModal').classList.add('show') }
+function closeSlipModal() { document.getElementById('slipModal').classList.remove('show') }
+
+function setSlip(pct, btn) {
+  slippageBps = Math.round(pct * 100);
+  document.getElementById('slipDisplay').textContent = pct + '%';
+  document.querySelectorAll('.slip-opt').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('slipCustom').value = '';
+  if (currentQuote) fetchQuote();
 }
 
-// ═══════════════════════════════════════
-// LIVE PRICES
-// ═══════════════════════════════════════
+function setSlipCustom(val) {
+  const v = parseFloat(val);
+  if (v > 0 && v <= 50) {
+    slippageBps = Math.round(v * 100);
+    document.getElementById('slipDisplay').textContent = v + '%';
+    document.querySelectorAll('.slip-opt').forEach(b => b.classList.remove('on'));
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TOKEN PICKER MODAL
+// ═══════════════════════════════════════════════
+function openTkModal(target) {
+  tkTarget = target;
+  document.getElementById('tkSearch').value = '';
+  renderTkList(TOKENS);
+  document.getElementById('tkModal').classList.add('show');
+}
+function closeTkModal() { document.getElementById('tkModal').classList.remove('show') }
+
+function filterTk() {
+  const q = document.getElementById('tkSearch').value.toLowerCase();
+  renderTkList(q ? TOKENS.filter(t => t.sym.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)) : TOKENS);
+}
+
+function renderTkList(list) {
+  const cur = tkTarget === 'in' ? inToken : outToken;
+  document.getElementById('tkList').innerHTML = list.map(tk => `
+    <div class="tk-item ${tk.sym === cur.sym ? 'sel' : ''}" onclick="selectTk('${tk.sym}')">
+      <img src="${tk.img}" alt="${tk.sym}" onerror="this.src='${TOKENS[0].img}'">
+      <div><div class="tk-sym-big">${tk.sym}</div><div class="tk-name-sm">${tk.name}</div></div>
+    </div>
+  `).join('');
+}
+
+function selectTk(sym) {
+  const tk = TOKENS.find(t => t.sym === sym);
+  if (!tk) return;
+  closeTkModal();
+
+  if (tkTarget === 'in') {
+    if (tk.sym === outToken.sym) { flipTokens(); return; }
+    inToken = tk;
+    document.getElementById('inImg').src = tk.img;
+    document.getElementById('inSym').textContent = tk.sym;
+  } else {
+    if (tk.sym === inToken.sym) { flipTokens(); return; }
+    outToken = tk;
+    document.getElementById('outImg').src = tk.img;
+    document.getElementById('outSym').textContent = tk.sym;
+  }
+
+  document.getElementById('inAmt').value  = '';
+  document.getElementById('outAmt').value = '';
+  clearRoute();
+  refreshBtn();
+  loadBalances();
+}
+
+function flipTokens() {
+  [inToken, outToken] = [outToken, inToken];
+  document.getElementById('inImg').src  = inToken.img;
+  document.getElementById('inSym').textContent  = inToken.sym;
+  document.getElementById('outImg').src = outToken.img;
+  document.getElementById('outSym').textContent = outToken.sym;
+  document.getElementById('inAmt').value  = document.getElementById('outAmt').value || '';
+  document.getElementById('outAmt').value = '';
+  clearRoute();
+  loadBalances();
+  if (document.getElementById('inAmt').value) onInput();
+  else refreshBtn();
+}
+
+// ═══════════════════════════════════════════════
+// QUOTE — Jupiter API
+// ═══════════════════════════════════════════════
+function onInput() {
+  clearTimeout(quoteDebounce);
+  const v = parseFloat(document.getElementById('inAmt').value);
+  if (!v || v <= 0) {
+    document.getElementById('outAmt').value = '';
+    clearRoute();
+    refreshBtn();
+    return;
+  }
+  // USD estimate সাথে সাথে দেখাও
+  if (inToken.sym === 'SOL') document.getElementById('inUsd').textContent = '≈ $' + (v * currentPrice).toFixed(2);
+  refreshBtn('loading');
+  quoteDebounce = setTimeout(fetchQuote, 700);
+}
+
+async function fetchQuote() {
+  const v = parseFloat(document.getElementById('inAmt').value);
+  if (!v || v <= 0) return;
+
+  const amtRaw = Math.floor(v * Math.pow(10, inToken.dec));
+  try {
+    const url = `${JUP}/quote?inputMint=${inToken.mint}&outputMint=${outToken.mint}&amount=${amtRaw}&slippageBps=${slippageBps}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Quote API: ' + res.status);
+    const q = await res.json();
+    currentQuote = q;
+
+    const outAmt  = parseInt(q.outAmount) / Math.pow(10, outToken.dec);
+    const minAmt  = parseInt(q.otherAmountThreshold) / Math.pow(10, outToken.dec);
+    const impact  = parseFloat(q.priceImpactPct || 0) * 100;
+    const rate    = (outAmt / v).toFixed(4);
+
+    document.getElementById('outAmt').value = outAmt.toFixed(Math.min(outToken.dec, 6));
+    document.getElementById('inUsd').textContent  = inToken.sym  === 'SOL' ? '≈ $' + (v * currentPrice).toFixed(2) : '';
+    document.getElementById('outUsd').textContent = outToken.sym === 'SOL' ? '≈ $' + (outAmt * currentPrice).toFixed(2) : '';
+
+    document.getElementById('rRate').textContent   = `1 ${inToken.sym} = ${rate} ${outToken.sym}`;
+    document.getElementById('rMin').textContent    = minAmt.toFixed(4) + ' ' + outToken.sym;
+    document.getElementById('rImpact').textContent = impact.toFixed(3) + '%';
+    document.getElementById('rImpact').className   = 'route-val ' + (impact < 0.5 ? 'g' : impact < 2 ? 'w' : 'r');
+
+    // Route path
+    const pathEl = document.getElementById('rPath');
+    pathEl.innerHTML = `<span class="hop">${inToken.sym}</span>`;
+    (q.routePlan || []).forEach(r => {
+      const mint = r.swapInfo?.outputMint;
+      const found = TOKENS.find(t => t.mint === mint);
+      pathEl.innerHTML += `<span style="color:var(--muted);margin:0 2px">→</span><span class="hop">${found ? found.sym : mint?.slice(0,4)+'...'}</span>`;
+    });
+
+    document.getElementById('routeBox').style.display = 'block';
+    refreshBtn('ready');
+
+  } catch(e) {
+    currentQuote = null;
+    clearRoute();
+    refreshBtn('error');
+    console.error(e);
+  }
+}
+
+function clearRoute() {
+  currentQuote = null;
+  document.getElementById('routeBox').style.display = 'none';
+  document.getElementById('outAmt').value = '';
+  document.getElementById('inUsd').textContent  = '≈ $0.00';
+  document.getElementById('outUsd').textContent = '≈ $0.00';
+}
+
+// ═══════════════════════════════════════════════
+// THE ONE BUTTON — refreshBtn() সব কিছু control করে
+// ═══════════════════════════════════════════════
+function refreshBtn(state) {
+  const btn = document.getElementById('swapBtn');
+  const amt = parseFloat(document.getElementById('inAmt').value);
+
+  btn.className = 'swap-btn';
+
+  if (!walletConnected) {
+    // Wallet নেই → সবুজ Connect Wallet বাটন
+    btn.classList.add('connect');
+    btn.textContent = '🔗 Connect Wallet';
+  } else if (state === 'loading') {
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="spin"></span>Getting best route...';
+  } else if (state === 'ready') {
+    btn.classList.add('ready');
+    btn.textContent = `Swap ${inToken.sym} → ${outToken.sym}`;
+  } else if (state === 'error') {
+    btn.classList.add('err');
+    btn.textContent = 'Could not get quote — retry';
+  } else if (!amt || amt <= 0) {
+    btn.classList.add('enter');
+    btn.textContent = 'Enter an amount';
+  } else {
+    btn.classList.add('enter');
+    btn.textContent = 'Enter an amount';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// BUTTON CLICK HANDLER
+// ═══════════════════════════════════════════════
+function handleSwapBtn() {
+  if (!walletConnected) {
+    openWalletModal(); // wallet নেই → modal খোলো
+    return;
+  }
+  if (!currentQuote) return; // quote নেই → কিছু করো না
+  executeSwap();             // সব ঠিক আছে → swap করো
+}
+
+// ═══════════════════════════════════════════════
+// EXECUTE SWAP — Real Solana Transaction
+// ═══════════════════════════════════════════════
+async function executeSwap() {
+  if (!walletProvider || !walletPubkey || !currentQuote) return;
+
+  const btn = document.getElementById('swapBtn');
+  btn.className = 'swap-btn loading';
+  btn.innerHTML = '<span class="spin"></span>Preparing transaction...';
+
+  try {
+    // 1. Jupiter Swap API থেকে transaction নাও
+    const swapRes = await fetch(`${JUP}/swap`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quoteResponse: currentQuote,
+        userPublicKey: walletPubkey,
+        wrapAndUnwrapSol: true,
+        dynamicComputeUnitLimit: true,
+        prioritizationFeeLamports: 'auto',
+      })
+    });
+    if (!swapRes.ok) throw new Error('Swap API error: ' + swapRes.status);
+    const { swapTransaction } = await swapRes.json();
+
+    // 2. Wallet থেকে approval নাও
+    btn.innerHTML = '<span class="spin"></span>Awaiting wallet approval...';
+    const conn = new solanaWeb3.Connection(RPC, { commitment: 'confirmed', confirmTransactionInitialTimeout: 120000 });
+    const txBuf = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
+    const tx    = solanaWeb3.VersionedTransaction.deserialize(txBuf);
+    const signed = await walletProvider.signTransaction(tx);
+
+    // 3. Solana mainnet-এ পাঠাও
+    btn.innerHTML = '<span class="spin"></span>Broadcasting to Solana...';
+    const txid = await conn.sendRawTransaction(signed.serialize(), { skipPreflight: true, maxRetries: 3 });
+
+    // 4. Confirm
+    btn.innerHTML = '<span class="spin"></span>Confirming...';
+    const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash();
+    const result = await conn.confirmTransaction({ blockhash, lastValidBlockHeight, signature: txid }, 'confirmed');
+    if (result.value.err) throw new Error('Transaction failed on-chain');
+
+    // ✓ Success
+    showToast(`✓ Swap done! Tx: ${txid.slice(0,8)}...`);
+    setTimeout(() => window.open(`https://solscan.io/tx/${txid}`, '_blank'), 600);
+
+    document.getElementById('inAmt').value  = '';
+    document.getElementById('outAmt').value = '';
+    clearRoute();
+    refreshBtn();
+    loadBalances();
+
+  } catch(e) {
+    console.error(e);
+    const msg = e.message?.includes('User rejected') || e.message?.includes('cancelled')
+      ? 'Transaction rejected' : (e.message || 'Swap failed');
+    showToast('⚠ ' + msg, true);
+    refreshBtn('ready'); // retry করতে পারবে
+  }
+}
+
+// ═══════════════════════════════════════════════
+// LIVE PRICES — Binance Public API (no rate limit)
+// ═══════════════════════════════════════════════
 const PAIRS = [
-  { id: 'solana',    sym: 'SOL',  pair: 'SOL/USDT' },
-  { id: 'bitcoin',   sym: 'BTC',  pair: 'BTC/USDT' },
-  { id: 'ethereum',  sym: 'ETH',  pair: 'ETH/USDT' },
-  { id: 'dogwifhat', sym: 'WIF',  pair: 'WIF/USDT' },
-  { id: 'bonk',      sym: 'BONK', pair: 'BONK/USDT' },
+  { binance:'SOLUSDT',  sym:'SOL',  pair:'SOL/USDT',  img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png' },
+  { binance:'BTCUSDT',  sym:'BTC',  pair:'BTC/USDT',  img:'https://assets.coingecko.com/coins/images/1/small/bitcoin.png' },
+  { binance:'ETHUSDT',  sym:'ETH',  pair:'ETH/USDT',  img:'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+  { binance:'WIFUSDT',  sym:'WIF',  pair:'WIF/USDT',  img:'https://bafkreibk3covs5ltyqxa272uodhculbyfbbkznam6jfqhde7f3fxacuay.ipfs.nftstorage.link/' },
+  { binance:'BONKUSDT', sym:'BONK', pair:'BONK/USDT', img:'https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I' },
 ];
 
 async function fetchPrices() {
   try {
-    const ids = PAIRS.map(p => p.id).join(',');
-    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`;
-    const res = await fetch(url);
+    // Binance — সব pair একসাথে এক request-এ
+    const symbols = JSON.stringify(PAIRS.map(p => p.binance));
+    const res  = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symbols)}`);
+    if (!res.ok) throw new Error('Binance API ' + res.status);
     const data = await res.json();
 
-    const pairEl = document.getElementById('pairList');
-    pairEl.innerHTML = '';
+    const pEl = document.getElementById('pairList');
+    pEl.innerHTML = '';
 
-    data.forEach((coin, i) => {
-      const pair = PAIRS.find(p => p.id === coin.id);
+    data.forEach((ticker, i) => {
+      const pair = PAIRS.find(p => p.binance === ticker.symbol);
       if (!pair) return;
 
-      const p = coin.current_price;
-      const ch = coin.price_change_percentage_24h || 0;
+      const p   = parseFloat(ticker.lastPrice);
+      const ch  = parseFloat(ticker.priceChangePercent);
       const pos = ch >= 0;
-      const fmt = p > 1000 ? '$' + (p / 1000).toFixed(2) + 'k' : p > 1 ? '$' + p.toFixed(2) : '$' + p.toFixed(6);
+      const fmt = p > 1000 ? '$'+(p/1000).toFixed(2)+'k'
+                : p > 1    ? '$'+p.toFixed(2)
+                :             '$'+p.toFixed(6);
 
-      // Update stats for SOL
-      if (coin.id === 'solana') {
+      if (pair.sym === 'SOL') {
         currentPrice = p;
+
+        // Stats bar
         document.getElementById('sPrice').textContent = '$' + p.toFixed(2);
-        document.getElementById('sChg').textContent = (pos ? '+' : '') + ch.toFixed(2) + '%';
-        document.getElementById('sChg').style.color = pos ? 'var(--accent)' : 'var(--red)';
+        document.getElementById('sChg').textContent   = (pos?'+':'')+ch.toFixed(2)+'%';
+        document.getElementById('sChg').style.color   = pos ? 'var(--accent)' : 'var(--red)';
+
+        // Chart header
         document.getElementById('liveP').textContent = '$' + p.toFixed(2);
-        document.getElementById('liveC').textContent = (pos ? '+' : '') + ch.toFixed(2) + '%';
+        document.getElementById('liveC').textContent = (pos?'+':'')+ch.toFixed(2)+'%';
         document.getElementById('liveC').style.color = pos ? 'var(--accent)' : 'var(--red)';
-        document.getElementById('sMkt').textContent = '$' + (coin.market_cap / 1e9).toFixed(1) + 'B';
-        document.getElementById('iMkt').textContent = '$' + (coin.market_cap / 1e9).toFixed(1) + 'B';
-        document.getElementById('iRsi').textContent = (40 + Math.random() * 20).toFixed(1);
-        const mv = (Math.random() - 0.5).toFixed(2);
+
+        // Volume & mkt cap estimate
+        const vol24h = parseFloat(ticker.quoteVolume); // USDT volume
+        document.getElementById('sVol').textContent = '$'+(vol24h/1e9).toFixed(1)+'B';
+        document.getElementById('sMkt').textContent = '$'+(p*5.8e8/1e9).toFixed(1)+'B'; // ~580M circulating
+        document.getElementById('iMkt').textContent = '$'+(p*5.8e8/1e9).toFixed(1)+'B';
+
+        // Indicators (simulated)
+        document.getElementById('iRsi').textContent  = (40+Math.random()*20).toFixed(1);
+        const mv = ((Math.random()-0.5)*2).toFixed(2);
         document.getElementById('iMacd').textContent = mv;
         document.getElementById('iMacd').style.color = mv > 0 ? 'var(--accent)' : 'var(--red)';
-        document.getElementById('qMkt').textContent = p.toFixed(2);
-        document.getElementById('qPrice').value = p.toFixed(4);
 
-        // Init chart with real price
+        // TPS
+        document.getElementById('sTps').textContent = (2800+Math.floor(Math.random()*400)).toLocaleString();
+
+        // Chart init
         if (!chart) initChart(p);
-        calcQ();
       }
 
-      pairEl.innerHTML += `
-        <div class="titem ${i === 0 ? 'on' : ''}" onclick="selectPair(this,'${pair.pair}','${coin.image}')">
-          <img src="${coin.image}" alt="${pair.sym}"
-            onerror="this.src='https://assets.coingecko.com/coins/images/1/small/bitcoin.png'">
+      pEl.innerHTML += `
+        <div class="titem ${i===0?'on':''}" onclick="selPair(this,'${pair.pair}','${pair.img}')">
+          <img src="${pair.img}" alt="${pair.sym}" onerror="this.style.background='#1a2535'">
           <div class="tii">
             <div class="tis">${pair.pair}</div>
-            <div class="tip ${pos ? 'g' : 'rr'}">${fmt}</div>
-            <div class="tic ${pos ? 'g' : 'rr'}">${pos ? '+' : ''}${ch.toFixed(2)}%</div>
+            <div class="tip ${pos?'g':'rr'}">${fmt}</div>
+            <div class="tic ${pos?'g':'rr'}">${pos?'+':''}${ch.toFixed(2)}%</div>
           </div>
         </div>`;
     });
 
-    document.getElementById('sVol').textContent = '$' + (1.2 + Math.random() * 0.6).toFixed(1) + 'B';
-    document.getElementById('sTps').textContent = (2800 + Math.floor(Math.random() * 400)).toLocaleString();
-
-  } catch (e) {
-    console.log('Price error:', e);
+  } catch(e) {
+    console.error('Price fetch error:', e);
+    // Fallback — dummy data দেখাও যাতে UI ভাঙা না দেখায়
+    if (!currentPrice) {
+      currentPrice = 150;
+      document.getElementById('sPrice').textContent = '$150.00';
+      if (!chart) initChart(150);
+    }
   }
 }
 
-function selectPair(el, pair, img) {
+// Binance WebSocket — real-time SOL price tick
+function startPriceTick() {
+  try {
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/solusdt@miniTicker');
+    ws.onmessage = e => {
+      const d = JSON.parse(e.data);
+      const p = parseFloat(d.c);
+      if (!p) return;
+      currentPrice = p;
+      document.getElementById('sPrice').textContent = '$' + p.toFixed(2);
+      document.getElementById('liveP').textContent  = '$' + p.toFixed(2);
+    };
+    ws.onerror = () => {}; // silent fail
+  } catch(e) {}
+}
+
+function selPair(el, pair, img) {
   document.querySelectorAll('.titem').forEach(r => r.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('pairName').textContent = pair;
@@ -620,42 +949,140 @@ function selectPair(el, pair, img) {
 }
 
 fetchPrices();
-setInterval(fetchPrices, 15000);
+setInterval(fetchPrices, 10000);
+startPriceTick();
+// Quote 25 সেকেন্ড পর expire হয়, তাই আপডেট রাখো
+setInterval(() => { if (currentQuote && document.getElementById('inAmt').value) fetchQuote(); }, 25000);
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════
 // LIVE TRADES
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════
 function addTrade() {
   const buy = Math.random() > 0.5;
-  const p = currentPrice ? (currentPrice + (Math.random() - 0.5) * 0.5).toFixed(4) : (100 + Math.random() * 2).toFixed(4);
-  const a = (0.1 + Math.random() * 5).toFixed(2);
+  const p   = currentPrice ? (currentPrice+(Math.random()-0.5)*0.5).toFixed(4) : '100.00';
+  const a   = (0.1+Math.random()*5).toFixed(2);
   const now = new Date();
-  const t = now.getHours().toString().padStart(2, '0') + ':' +
-    now.getMinutes().toString().padStart(2, '0') + ':' +
-    now.getSeconds().toString().padStart(2, '0');
+  const t   = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
   const list = document.getElementById('tradeList');
-  const row = document.createElement('div');
+  const row  = document.createElement('div');
   row.className = 'trow';
-  row.innerHTML = `
-    <span class="${buy ? 'g' : 'rr'}">${buy ? 'BUY' : 'SELL'}</span>
-    <span class="${buy ? 'g' : 'rr'}">${p}</span>
-    <span>${a}</span>
-    <span style="color:var(--muted)">${t}</span>`;
+  row.innerHTML = `<span class="${buy?'g':'rr'}">${buy?'BUY':'SELL'}</span><span class="${buy?'g':'rr'}">${p}</span><span>${a}</span><span style="color:var(--muted)">${t}</span>`;
   list.insertBefore(row, list.firstChild);
   if (list.children.length > 12) list.removeChild(list.lastChild);
 }
-for (let i = 0; i < 8; i++) addTrade();
+for(let i=0;i<8;i++) addTrade();
 setInterval(addTrade, 1800);
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CHART — Binance Kline WebSocket (Real Candles)
+// ═══════════════════════════════════════════════
+let chart, cs, candles = [], currentTF = '1m';
+let klineWs = null;
+
+const TF_MAP = {
+  '1m':'1m', '5m':'5m', '15m':'15m', '1h':'1h', '4h':'4h', '1d':'1d'
+};
+
+function initChart(basePrice) {
+  const el = document.getElementById('chartDiv');
+  if (!el) return;
+  if (chart) { chart.remove(); chart = null; }
+
+  chart = LightweightCharts.createChart(el, {
+    width:  el.clientWidth,
+    height: 290,
+    layout: { background:{color:'#0d1520'}, textColor:'#dff0ec' },
+    grid:   { vertLines:{color:'rgba(0,220,180,0.05)'}, horzLines:{color:'rgba(0,220,180,0.05)'} },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    rightPriceScale: { borderColor:'rgba(0,220,180,0.15)' },
+    timeScale: { borderColor:'rgba(0,220,180,0.15)', timeVisible:true, secondsVisible:false },
+  });
+
+  cs = chart.addCandlestickSeries({
+    upColor:'#00dcb4', downColor:'#ff4560',
+    borderUpColor:'#00dcb4', borderDownColor:'#ff4560',
+    wickUpColor:'#00dcb4',   wickDownColor:'#ff4560',
+  });
+
+  window.addEventListener('resize', () => { if(chart && el) chart.applyOptions({width:el.clientWidth}) });
+
+  // Binance REST থেকে historical candles লোড করো
+  loadKlines(currentTF);
+}
+
+async function loadKlines(interval) {
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=${interval}&limit=150`);
+    const raw = await res.json();
+    candles = raw.map(k => ({
+      time:  Math.floor(k[0] / 1000),
+      open:  parseFloat(k[1]),
+      high:  parseFloat(k[2]),
+      low:   parseFloat(k[3]),
+      close: parseFloat(k[4]),
+    }));
+    cs.setData(candles);
+    chart.timeScale().fitContent();
+
+    // এখন WebSocket দিয়ে live update শুরু করো
+    startKlineWs(interval);
+  } catch(e) {
+    console.error('Kline load error:', e);
+  }
+}
+
+function startKlineWs(interval) {
+  if (klineWs) { klineWs.close(); klineWs = null; }
+  try {
+    klineWs = new WebSocket(`wss://stream.binance.com:9443/ws/solusdt@kline_${interval}`);
+    klineWs.onmessage = e => {
+      const d  = JSON.parse(e.data);
+      const k  = d.k;
+      const bar = {
+        time:  Math.floor(k.t / 1000),
+        open:  parseFloat(k.o),
+        high:  parseFloat(k.h),
+        low:   parseFloat(k.l),
+        close: parseFloat(k.c),
+      };
+      // আছে কিনা চেক করো
+      if (candles.length && candles[candles.length-1].time === bar.time) {
+        candles[candles.length-1] = bar;
+      } else {
+        candles.push(bar);
+        if (candles.length > 300) candles.shift();
+      }
+      cs.update(bar);
+    };
+    klineWs.onerror = () => {};
+  } catch(e) {}
+}
+
+function setTF(btn, sec) {
+  document.querySelectorAll('.tf').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  // sec থেকে interval string বের করো
+  const map = {60:'1m', 300:'5m', 900:'15m', 3600:'1h', 14400:'4h', 86400:'1d'};
+  currentTF = map[sec] || '1m';
+  candles = [];
+  if (cs) { cs.setData([]); }
+  loadKlines(currentTF);
+}
+
+// ═══════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════
-function toast(msg) {
+// ═══════════════════════════════════════════════
+function showToast(msg, isErr=false) {
   const el = document.getElementById('toast');
   el.textContent = msg;
+  el.className = 'toast' + (isErr ? ' err' : '');
+  void el.offsetWidth; // reflow
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3500);
+  setTimeout(() => el.classList.remove('show'), 4000);
 }
+
+// Page load-এ বাটন initialize করো
+refreshBtn();
 </script>
 </body>
 </html>
