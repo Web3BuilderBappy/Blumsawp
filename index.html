@@ -6,7 +6,7 @@
 <title>RialoSwap — Solana DEX</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-<script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -178,24 +178,35 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
   border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;
   vertical-align:middle;margin-right:6px}
 
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:800;
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
 .overlay.show{display:flex}
-.modal-box{background:#0d1520;border:1px solid var(--border);border-radius:14px;
-  padding:26px;width:330px;max-width:92vw}
-.modal-title{font-size:1rem;font-weight:800;letter-spacing:1px;margin-bottom:4px}
-.modal-sub{font-size:0.7rem;color:var(--muted);margin-bottom:16px}
-.w-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;
-  border:1px solid var(--border);background:rgba(255,255,255,0.03);
-  cursor:pointer;margin-bottom:8px;transition:.2s}
-.w-opt:hover{background:rgba(0,220,180,0.07);border-color:rgba(0,220,180,0.3)}
-.w-opt img{width:36px;height:36px;border-radius:8px;object-fit:contain;background:#1a2535;padding:4px}
-.w-name{font-size:0.8rem;font-weight:700}
-.w-desc{font-size:0.6rem;color:var(--muted)}
-.modal-cancel{width:100%;padding:9px;border-radius:7px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-family:var(--font);font-size:0.72rem;
-  cursor:pointer;margin-top:2px;transition:.2s}
-.modal-cancel:hover{border-color:var(--accent);color:var(--accent)}
+.modal-box{background:linear-gradient(145deg, #0f1825 0%, #0d1520 100%);
+  border:1px solid var(--border);border-radius:16px;
+  padding:28px;width:360px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.modal-title{font-size:1.1rem;font-weight:800;letter-spacing:1px;margin-bottom:6px;
+  background:linear-gradient(120deg,var(--accent2),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.modal-sub{font-size:0.72rem;color:var(--muted);margin-bottom:20px}
+.w-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;
+  border:1px solid var(--border);background:rgba(255,255,255,0.02);
+  cursor:pointer;margin-bottom:10px;transition:.2s;position:relative;overflow:hidden}
+.w-opt::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,220,180,0.05),transparent);
+  transform:translateX(-100%);transition:.5s}
+.w-opt:hover::before{transform:translateX(100%)}
+.w-opt:hover{background:rgba(0,220,180,0.06);border-color:rgba(0,220,180,0.4);transform:translateX(4px)}
+.w-opt.checking{opacity:0.6;pointer-events:none}
+.w-opt.checking::after{content:'⏳';position:absolute;right:16px;font-size:1.2rem}
+.w-icon{width:42px;height:42px;border-radius:10px;object-fit:contain;
+  background:rgba(255,255,255,0.08);padding:6px;flex-shrink:0}
+.w-info{flex:1}
+.w-name{font-size:0.85rem;font-weight:700;margin-bottom:2px}
+.w-desc{font-size:0.62rem;color:var(--muted)}
+.w-status{font-size:0.58rem;color:var(--accent);margin-top:2px}
+.modal-cancel{width:100%;padding:11px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:var(--font);font-size:0.75rem;
+  cursor:pointer;margin-top:8px;transition:.2s;font-weight:600;letter-spacing:0.5px}
+.modal-cancel:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,220,180,0.05)}
 
 .slip-box{background:#0d1520;border:1px solid var(--border);border-radius:12px;
   padding:22px;width:290px}
@@ -256,19 +267,8 @@ footer b{color:var(--accent)}
 <div class="overlay" id="walletModal">
   <div class="modal-box">
     <div class="modal-title">Connect Wallet</div>
-    <div class="modal-sub">Choose your Solana wallet</div>
-    <div class="w-opt" onclick="doConnect('Phantom')">
-      <img src="data:image/svg+xml,%3Csvg width='128' height='128' viewBox='0 0 128 128' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M107.026 27.774C97.552 17.37 84.558 11 70 11 45.147 11 25 31.147 25 56c0 24.853 20.147 45 45 45 14.558 0 27.552-6.37 37.026-16.774 1.638-1.8 2.474-4.17 2.474-6.54V34.314c0-2.37-.836-4.74-2.474-6.54z' fill='%235865F2'/%3E%3Cpath d='M73.5 57c0 1.933-1.567 3.5-3.5 3.5s-3.5-1.567-3.5-3.5 1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5zM90.5 57c0 1.933-1.567 3.5-3.5 3.5s-3.5-1.567-3.5-3.5 1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5z' fill='white'/%3E%3C/svg%3E" alt="Phantom">
-      <div><div class="w-name">Phantom</div><div class="w-desc">Most popular Solana wallet</div></div>
-    </div>
-    <div class="w-opt" onclick="doConnect('Solflare')">
-      <img src="data:image/svg+xml,%3Csvg width='128' height='128' viewBox='0 0 128 128' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='128' height='128' rx='24' fill='%23FC7227'/%3E%3Cpath d='M64 20l40 40-40 8-8 40-40-40 40-8 8-40z' fill='white'/%3E%3C/svg%3E" alt="Solflare">
-      <div><div class="w-name">Solflare</div><div class="w-desc">Non-custodial Solana wallet</div></div>
-    </div>
-    <div class="w-opt" onclick="doConnect('Backpack')">
-      <img src="data:image/svg+xml,%3Csvg width='128' height='128' viewBox='0 0 128 128' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='128' height='128' rx='24' fill='%23E33D3D'/%3E%3Cpath d='M64 30L40 50v30l24 18 24-18V50L64 30z' fill='white'/%3E%3C/svg%3E" alt="Backpack">
-      <div><div class="w-name">Backpack</div><div class="w-desc">Multi-chain wallet</div></div>
-    </div>
+    <div class="modal-sub">Choose your Solana wallet to continue</div>
+    <div id="walletOptions"></div>
     <button class="modal-cancel" onclick="closeWalletModal()">Cancel</button>
   </div>
 </div>
@@ -426,6 +426,29 @@ footer b{color:var(--accent)}
 const RPC = 'https://api.mainnet-beta.solana.com';
 const JUP = 'https://quote-api.jup.ag/v6';
 
+const WALLETS = [
+  {
+    name: 'Phantom',
+    icon: 'data:image/svg+xml,%3Csvg fill="none" height="34" width="34" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M28 12.5C28 18.8513 23.2843 24 17.5 24 11.7157 24 7 18.8513 7 12.5S11.7157 1 17.5 1 28 6.14873 28 12.5Z" fill="%23AB9FF2"/%3E%3Cpath d="M14.5 11.5C14.5 12.3284 13.8284 13 13 13S11.5 12.3284 11.5 11.5 12.1716 10 13 10s1.5.6716 1.5 1.5ZM23.5 11.5c0 .8284-.6716 1.5-1.5 1.5s-1.5-.6716-1.5-1.5.6716-1.5 1.5-1.5 1.5.6716 1.5 1.5Z" fill="%23fff"/%3E%3C/svg%3E',
+    check: () => window.solana?.isPhantom
+  },
+  {
+    name: 'Solflare',
+    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="16" cy="16" fill="%23fc7227" r="16"/%3E%3Cpath d="m10 18 6-6 6 6" stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/%3E%3C/svg%3E',
+    check: () => window.solflare
+  },
+  {
+    name: 'Backpack',
+    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Crect fill="%23E33D3D" height="32" rx="8" width="32"/%3E%3Cpath d="M16 8l-6 6v8l6 4 6-4v-8l-6-6z" fill="%23fff"/%3E%3C/svg%3E',
+    check: () => window.backpack
+  },
+  {
+    name: 'Coinbase Wallet',
+    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="16" cy="16" fill="%231652f0" r="16"/%3E%3Cpath d="M16 7c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" fill="%23fff"/%3E%3Cpath d="M13 14h6v4h-6z" fill="%23fff"/%3E%3C/svg%3E',
+    check: () => window.coinbaseSolana
+  }
+];
+
 const TOKENS = [
   { sym:'SOL',  name:'Solana',       mint:'So11111111111111111111111111111111111111112',      dec:9, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png' },
   { sym:'USDC', name:'USD Coin',     mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png' },
@@ -449,42 +472,73 @@ let quoteDebounce = null;
 let currentPrice = 0;
 let tkTarget = 'in';
 
-function openWalletModal() { document.getElementById('walletModal').classList.add('show') }
-function closeWalletModal() { document.getElementById('walletModal').classList.remove('show') }
+function renderWalletOptions() {
+  const container = document.getElementById('walletOptions');
+  container.innerHTML = WALLETS.map(w => {
+    const installed = w.check();
+    return `
+      <div class="w-opt ${!installed?'':''}  " onclick="doConnect('${w.name}', ${installed})" data-wallet="${w.name}">
+        <img class="w-icon" src="${w.icon}" alt="${w.name}">
+        <div class="w-info">
+          <div class="w-name">${w.name}</div>
+          <div class="w-desc">${installed ? 'Detected' : 'Not installed'}</div>
+          ${!installed ? '<div class="w-status">Click to install</div>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-async function doConnect(walletName) {
-  closeWalletModal();
+function openWalletModal() {
+  renderWalletOptions();
+  document.getElementById('walletModal').classList.add('show');
+}
+
+function closeWalletModal() {
+  document.getElementById('walletModal').classList.remove('show');
+}
+
+async function doConnect(walletName, isInstalled) {
+  const optEl = document.querySelector(`[data-wallet="${walletName}"]`);
+  
+  if (!isInstalled) {
+    const urls = {
+      'Phantom': 'https://phantom.app/download',
+      'Solflare': 'https://solflare.com/download',
+      'Backpack': 'https://backpack.app/download',
+      'Coinbase Wallet': 'https://www.coinbase.com/wallet/downloads'
+    };
+    showToast(`Redirecting to ${walletName} download page...`);
+    setTimeout(() => window.open(urls[walletName], '_blank'), 1000);
+    return;
+  }
+
+  if (optEl) {
+    optEl.classList.add('checking');
+  }
+
   try {
     let provider = null;
     let pubkey = null;
 
-    if (walletName === 'Phantom') {
-      if (!window.solana?.isPhantom) {
-        showToast('Please install Phantom wallet extension', true);
-        setTimeout(() => window.open('https://phantom.app/', '_blank'), 1000);
-        return;
-      }
+    if (walletName === 'Phantom' && window.solana?.isPhantom) {
       const resp = await window.solana.connect();
       pubkey = resp.publicKey.toString();
       provider = window.solana;
-    } else if (walletName === 'Solflare') {
-      if (!window.solflare) {
-        showToast('Please install Solflare wallet extension', true);
-        setTimeout(() => window.open('https://solflare.com/', '_blank'), 1000);
-        return;
-      }
+    } else if (walletName === 'Solflare' && window.solflare) {
       await window.solflare.connect();
       pubkey = window.solflare.publicKey.toString();
       provider = window.solflare;
-    } else if (walletName === 'Backpack') {
-      if (!window.backpack) {
-        showToast('Please install Backpack wallet extension', true);
-        setTimeout(() => window.open('https://backpack.app/', '_blank'), 1000);
-        return;
-      }
+    } else if (walletName === 'Backpack' && window.backpack) {
       const resp = await window.backpack.connect();
       pubkey = resp.publicKey.toString();
       provider = window.backpack;
+    } else if (walletName === 'Coinbase Wallet' && window.coinbaseSolana) {
+      const resp = await window.coinbaseSolana.connect();
+      pubkey = resp.publicKey.toString();
+      provider = window.coinbaseSolana;
+    } else {
+      throw new Error('Wallet not available');
     }
 
     walletPubkey = pubkey;
@@ -495,16 +549,44 @@ async function doConnect(walletName) {
     const btn = document.getElementById('cwBtn');
     btn.textContent = '● ' + short;
     btn.classList.add('connected');
-    btn.onclick = null;
+    btn.onclick = disconnectWallet;
 
-    showToast('✓ ' + walletName + ' connected!');
+    closeWalletModal();
+    showToast(`✓ ${walletName} connected!`);
     refreshBtn();
     loadBalances();
 
   } catch(e) {
     console.error('Connection error:', e);
-    showToast('Connection cancelled or failed', true);
+    showToast(e.message?.includes('User rejected') ? 'Connection cancelled' : 'Connection failed', true);
+  } finally {
+    if (optEl) {
+      optEl.classList.remove('checking');
+    }
   }
+}
+
+async function disconnectWallet() {
+  if (walletProvider?.disconnect) {
+    try {
+      await walletProvider.disconnect();
+    } catch(e) {}
+  }
+  
+  walletConnected = false;
+  walletPubkey = null;
+  walletProvider = null;
+  
+  const btn = document.getElementById('cwBtn');
+  btn.textContent = '🔗 Connect Wallet';
+  btn.classList.remove('connected');
+  btn.onclick = openWalletModal;
+  
+  document.getElementById('inBal').textContent = 'Balance: --';
+  document.getElementById('outBal').textContent = 'Balance: --';
+  
+  showToast('Wallet disconnected');
+  refreshBtn();
 }
 
 async function loadBalances() {
@@ -569,16 +651,10 @@ function openTkModal(target) {
   renderTkList(TOKENS);
   document.getElementById('tkModal').classList.add('show');
 }
-function closeTkModal() { 
+
+function closeTkModal() {
   document.getElementById('tkModal').classList.remove('show');
-  document.removeEventListener('click', handleModalClick);
 }
-
-function handleModalClick(e) {
-  if (e.target.id === 'tkModal') closeTkModal();
-}
-
-document.getElementById('tkModal').addEventListener('click', handleModalClick);
 
 function filterTk() {
   const q = document.getElementById('tkSearch').value.toLowerCase();
@@ -755,24 +831,41 @@ async function executeSwap() {
         prioritizationFeeLamports: 'auto',
       })
     });
-    if (!swapRes.ok) throw new Error('Swap API error: ' + swapRes.status);
+    
+    if (!swapRes.ok) {
+      const error = await swapRes.text();
+      throw new Error('Swap API error: ' + error);
+    }
+    
     const { swapTransaction } = await swapRes.json();
 
     btn.innerHTML = '<span class="spin"></span>Awaiting wallet approval...';
     const conn = new solanaWeb3.Connection(RPC, { commitment: 'confirmed', confirmTransactionInitialTimeout: 120000 });
     const txBuf = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
     const tx = solanaWeb3.VersionedTransaction.deserialize(txBuf);
+    
     const signed = await walletProvider.signTransaction(tx);
 
     btn.innerHTML = '<span class="spin"></span>Broadcasting to Solana...';
-    const txid = await conn.sendRawTransaction(signed.serialize(), { skipPreflight: true, maxRetries: 3 });
+    const txid = await conn.sendRawTransaction(signed.serialize(), { 
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+      maxRetries: 3
+    });
 
     btn.innerHTML = '<span class="spin"></span>Confirming...';
-    const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash();
-    const result = await conn.confirmTransaction({ blockhash, lastValidBlockHeight, signature: txid }, 'confirmed');
-    if (result.value.err) throw new Error('Transaction failed on-chain');
+    const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash('confirmed');
+    const result = await conn.confirmTransaction({ 
+      blockhash, 
+      lastValidBlockHeight, 
+      signature: txid 
+    }, 'confirmed');
+    
+    if (result.value.err) {
+      throw new Error('Transaction failed on-chain: ' + JSON.stringify(result.value.err));
+    }
 
-    showToast(`✓ Swap done! Tx: ${txid.slice(0,8)}...`);
+    showToast(`✓ Swap successful! Tx: ${txid.slice(0,8)}...`);
     setTimeout(() => window.open(`https://solscan.io/tx/${txid}`, '_blank'), 600);
 
     document.getElementById('inAmt').value = '';
@@ -782,9 +875,12 @@ async function executeSwap() {
     loadBalances();
 
   } catch(e) {
-    console.error(e);
+    console.error('Swap error:', e);
     const msg = e.message?.includes('User rejected') || e.message?.includes('cancelled')
-      ? 'Transaction rejected' : (e.message || 'Swap failed');
+      ? 'Transaction rejected' 
+      : e.message?.includes('insufficient funds')
+      ? 'Insufficient funds for swap + fees'
+      : (e.message || 'Swap failed');
     showToast('⚠ ' + msg, true);
     refreshBtn('ready');
   }
@@ -1005,6 +1101,9 @@ document.getElementById('walletModal').addEventListener('click', e => {
 });
 document.getElementById('slipModal').addEventListener('click', e => {
   if (e.target.id === 'slipModal') closeSlipModal();
+});
+document.getElementById('tkModal').addEventListener('click', e => {
+  if (e.target.id === 'tkModal') closeTkModal();
 });
 </script>
 </body>
