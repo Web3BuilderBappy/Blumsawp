@@ -6,11 +6,11 @@
 <title>RialoSwap — Solana DEX</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<!-- Chart library FIRST -->
+<!-- Lightweight Charts -->
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 
-<!-- Jupiter Terminal -->
-<script src="https://terminal.jup.ag/main-v3.js" data-preload></script>
+<!-- ✅ Jupiter Plugin v1 — Official latest CDN (replaces old terminal/main-v3.js) -->
+<script src="https://plugin.jup.ag/plugin-v1.js" data-preload defer></script>
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -46,16 +46,10 @@ nav{position:sticky;top:0;z-index:300;display:flex;align-items:center;
 .ndot{width:6px;height:6px;border-radius:50%;background:var(--accent);
   box-shadow:0 0 6px var(--accent);animation:blink 2s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-#cwBtn{padding:8px 18px;border-radius:7px;
-  background:linear-gradient(135deg,var(--accent),#00a88a);
-  border:none;color:#05100a;font-family:var(--font);font-size:0.74rem;
-  font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s}
-#cwBtn:hover{box-shadow:0 0 20px rgba(0,220,180,0.4);transform:translateY(-1px)}
-#cwBtn.on{background:rgba(0,220,180,0.1);border:1px solid var(--accent);color:var(--accent)}
 
 /* LAYOUT */
-main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16px;
-  display:grid;grid-template-columns:175px 1fr 355px;gap:12px}
+main{position:relative;z-index:1;max-width:1380px;margin:0 auto;padding:14px 16px;
+  display:grid;grid-template-columns:180px 1fr 390px;gap:12px}
 
 /* PANELS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
@@ -64,7 +58,7 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
 .ch::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
 
 /* TOKEN PAIRS LEFT */
-.tpairs{grid-row:1/3}
+.tpairs{grid-row:1/4}
 .titem{display:flex;align-items:center;gap:7px;padding:9px 10px;cursor:pointer;
   border-bottom:1px solid rgba(0,220,180,0.04);transition:.15s}
 .titem:hover{background:rgba(0,220,180,0.05)}
@@ -77,10 +71,10 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
 .tic{font-size:0.56rem;font-family:var(--mono)}
 .g{color:var(--accent)}.rr{color:var(--red)}
 
-/* CENTER COLUMN */
+/* CENTER */
 .center{display:flex;flex-direction:column;gap:12px}
 
-/* CHART CARD */
+/* CHART */
 .cchart{display:flex;flex-direction:column}
 .ctop{display:flex;align-items:center;gap:12px;padding:12px 16px;
   border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -120,110 +114,58 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
   animation:fin .3s ease}
 @keyframes fin{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
 
-/* RIGHT SWAP PANEL */
+/* RIGHT COLUMN */
 .right{display:flex;flex-direction:column;gap:12px}
 
-/* QUICK TRADE */
-.qtcard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.qt-tabs{display:grid;grid-template-columns:1fr 1fr}
-.qt-tab{padding:13px;text-align:center;font-size:0.76rem;font-weight:800;
-  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s;
-  color:var(--muted);border-bottom:1px solid var(--border)}
-.qt-tab.buy.on{color:#05100a;background:var(--accent);border-bottom-color:transparent}
-.qt-tab.sell.on{color:#fff;background:var(--red);border-bottom-color:transparent}
-.qt-tab:not(.on):hover{color:var(--text);background:rgba(255,255,255,0.03)}
-.qbody{padding:16px}
-.ql{font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:5px}
-.qrow{display:flex;justify-content:space-between;margin-bottom:5px}
-.qavail{font-size:0.6rem;font-family:var(--mono);color:var(--muted)}
-.qinp{width:100%;padding:11px 13px;background:rgba(255,255,255,0.04);
-  border:1px solid var(--border);border-radius:8px;color:var(--text);
-  font-family:var(--mono);font-size:0.88rem;font-weight:600;outline:none;
-  transition:.2s;margin-bottom:10px}
-.qinp:focus{border-color:rgba(0,220,180,0.35);background:rgba(0,220,180,0.04)}
-.qinp[readonly]{opacity:.6}
-.pinfo{background:rgba(0,220,180,0.04);border:1px solid rgba(0,220,180,0.1);
-  border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:0.66rem;font-family:var(--mono)}
-.prow{display:flex;justify-content:space-between;padding:2px 0;color:var(--muted)}
-.prow span:last-child{color:var(--text);font-weight:600}
-.execbtn{width:100%;padding:13px;border-radius:8px;border:none;font-family:var(--font);
-  font-size:0.8rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s}
-.execbtn.b{background:linear-gradient(135deg,var(--accent),#009e8a);color:#05100a}
-.execbtn.s{background:linear-gradient(135deg,#ff4560,#c0003a);color:#fff}
-.execbtn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,220,180,0.3)}
-.execbtn.s:hover{box-shadow:0 5px 18px rgba(255,69,96,0.3)}
+/* Jupiter Plugin Card */
+.jup-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+}
+.jup-header{
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  font-size:0.62rem;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:7px;
+}
+.jup-header::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
 
-/* JUPITER */
-#jup-wrap{border-top:1px solid var(--border)}
-.jlbl{padding:9px 14px;font-size:0.6rem;font-weight:700;letter-spacing:2px;
-  text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
-.jlbl::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
-#jup-container{min-height:380px}
+/* Jupiter plugin container — let it expand naturally */
+#jup-plugin-container{
+  width:100%;
+  min-height:520px;
+}
 
-/* WALLET MODAL */
-.moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
-.moverlay.show{display:flex}
-.mbox{background:#0d1520;border:1px solid var(--border);border-radius:14px;
-  padding:26px;width:330px;max-width:92vw}
-.mt{font-size:1rem;font-weight:800;letter-spacing:1px;margin-bottom:4px}
-.ms{font-size:0.7rem;color:var(--muted);margin-bottom:16px}
-.wopt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:9px;
-  border:1px solid var(--border);background:rgba(255,255,255,0.03);
-  cursor:pointer;margin-bottom:8px;transition:.2s}
-.wopt:hover{background:rgba(0,220,180,0.07);border-color:rgba(0,220,180,0.3)}
-.wopt img{width:36px;height:36px;border-radius:8px;object-fit:cover}
-.wnm{font-size:0.8rem;font-weight:700}
-.wd{font-size:0.6rem;color:var(--muted)}
-.mclose{width:100%;padding:9px;border-radius:7px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-family:var(--font);font-size:0.72rem;
-  cursor:pointer;margin-top:2px;transition:.2s}
-.mclose:hover{border-color:var(--accent);color:var(--accent)}
+/* Network info card */
+.netcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.nctitle{font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.nctitle::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
+.ncrow{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid rgba(0,220,180,0.05);font-size:0.68rem;font-family:var(--mono)}
+.ncrow:last-child{border-bottom:none}
+.ncrow span:first-child{color:var(--muted)}
 
 /* TOAST */
 .toast{position:fixed;bottom:22px;right:22px;z-index:600;
   background:var(--card);border:1px solid var(--accent);border-radius:9px;
   padding:13px 17px;font-size:0.76rem;line-height:1.5;
-  transform:translateY(80px);opacity:0;transition:.35s;max-width:270px}
+  transform:translateY(80px);opacity:0;transition:.35s;max-width:280px}
 .toast.show{transform:none;opacity:1}
 
-footer{position:relative;z-index:1;text-align:center;padding:18px;
+footer{position:relative;z-index:1;text-align:center;padding:18px;margin-top:14px;
   font-size:0.63rem;color:var(--muted);border-top:1px solid var(--border);letter-spacing:1px}
 footer b{color:var(--accent)}
 
-@media(max-width:960px){
-  main{grid-template-columns:1fr}
-  .tpairs{display:none}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .navlinks{display:none}
-}
+@media(max-width:1100px){main{grid-template-columns:1fr 390px}.tpairs{display:none}}
+@media(max-width:720px){main{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}}
 </style>
 </head>
 <body>
 
-<!-- WALLET MODAL -->
-<div class="moverlay" id="wmodal">
-  <div class="mbox">
-    <div class="mt">Connect Wallet</div>
-    <div class="ms">Choose your Solana wallet to swap</div>
-    <div class="wopt" onclick="doConnect('Phantom')">
-      <img src="https://phantom.app/img/phantom-logo.png" onerror="this.style.background='#4e44ce'">
-      <div><div class="wnm">Phantom</div><div class="wd">Most popular Solana wallet</div></div>
-    </div>
-    <div class="wopt" onclick="doConnect('Solflare')">
-      <img src="https://solflare.com/favicon.ico" onerror="this.style.background='#fc7227'">
-      <div><div class="wnm">Solflare</div><div class="wd">Non-custodial Solana wallet</div></div>
-    </div>
-    <div class="wopt" onclick="doConnect('Backpack')">
-      <img src="https://backpack.app/favicon.ico" onerror="this.style.background='#e33d3d'">
-      <div><div class="wnm">Backpack</div><div class="wd">Multi-chain wallet</div></div>
-    </div>
-    <button class="mclose" onclick="closeModal()">Cancel</button>
-  </div>
-</div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <!-- NAV -->
@@ -236,23 +178,21 @@ footer b{color:var(--accent)}
     <a>Portfolio</a>
   </div>
   <div class="navr">
-    <div class="nbadge"><div class="ndot"></div>SOLANA</div>
-    <button id="cwBtn" onclick="openModal()">🔗 Connect Wallet</button>
+    <div class="nbadge"><div class="ndot"></div>SOLANA MAINNET</div>
   </div>
 </nav>
 
 <main>
 
-  <!-- LEFT: TRADING PAIRS -->
+  <!-- LEFT: PAIRS -->
   <div class="card tpairs">
-    <div class="ch">Trading Pairs</div>
+    <div class="ch">Market Pairs</div>
     <div id="pairList"></div>
   </div>
 
   <!-- CENTER -->
   <div class="center">
 
-    <!-- STATS -->
     <div class="stats">
       <div class="stat"><div class="sl">SOL Price</div><div class="sv" id="sPrice">$--</div><div class="ss" id="sChg">--</div></div>
       <div class="stat"><div class="sl">24h Volume</div><div class="sv" id="sVol">$--</div><div class="ss" style="color:var(--muted)">Solana DEX</div></div>
@@ -260,14 +200,13 @@ footer b{color:var(--accent)}
       <div class="stat"><div class="sl">Network TPS</div><div class="sv" id="sTps">--</div><div class="ss" style="color:var(--muted)">tx/sec</div></div>
     </div>
 
-    <!-- CHART -->
     <div class="card cchart">
       <div class="ctop">
         <div class="plogos">
           <img id="pLogo1" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png" alt="SOL">
           <img id="pLogo2" src="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg" alt="USDT">
         </div>
-        <span class="pnm" id="pairName">SOL / USDT</span>
+        <span class="pnm" id="pairName">SOL / USDC</span>
         <div class="ppw">
           <span class="lp" id="liveP">$--</span>
           <span class="lc" id="liveC">--</span>
@@ -285,141 +224,133 @@ footer b{color:var(--accent)}
       <div class="inds">
         <div class="ind"><span class="ind-l">RSI(14)</span><span class="ind-v" id="iRsi" style="color:#f0a500">--</span></div>
         <div class="ind"><span class="ind-l">MACD</span><span class="ind-v" id="iMacd">--</span></div>
-        <div class="ind"><span class="ind-l">Vol 24h</span><span class="ind-v g">1.5B</span></div>
+        <div class="ind"><span class="ind-l">Vol 24h</span><span class="ind-v g" id="iVol">--</span></div>
         <div class="ind"><span class="ind-l">Mkt Cap</span><span class="ind-v g" id="iMkt">--</span></div>
       </div>
     </div>
 
-    <!-- RECENT TRADES -->
     <div class="card">
       <div class="ch">Recent Trades</div>
-      <div class="tcols"><span>Type</span><span>Price (USDT)</span><span>Amount</span><span>Time</span></div>
+      <div class="tcols"><span>Type</span><span>Price (USDC)</span><span>Amount</span><span>Time</span></div>
       <div id="tradeList"></div>
     </div>
 
   </div>
 
-  <!-- RIGHT -->
+  <!-- RIGHT: JUPITER PLUGIN -->
   <div class="right">
 
-    <!-- QUICK TRADE -->
-    <div class="qtcard">
-      <div class="qt-tabs">
-        <div class="qt-tab buy on" id="tabBuy" onclick="swTab('buy')">⚡ Quick Trade</div>
-        <div class="qt-tab sell" id="tabSell" onclick="swTab('sell')">Order Book</div>
-      </div>
-      <div class="qbody">
-        <div class="qrow">
-          <div class="ql">Amount</div>
-          <div class="qavail" id="qAvail">Available: -- SOL</div>
-        </div>
-        <input class="qinp" id="qAmt" type="number" placeholder="1.0" oninput="calcQ()">
+    <!--
+      ✅ Jupiter Plugin v1 — Official integration
+      CDN: https://plugin.jup.ag/plugin-v1.js
+      - Full token list (400,000+ tokens)
+      - Built-in wallet connect (Phantom, Solflare, Backpack, etc.)
+      - Ultra mode: RPC-less, auto slippage, auto fees
+      - No endpoint required
+    -->
+    <div class="jup-card">
+      <div class="jup-header">⚡ Swap — Powered by Jupiter</div>
+      <div id="jup-plugin-container"></div>
+    </div>
 
-        <div class="ql">Price (USDT)</div>
-        <div style="position:relative;margin-bottom:10px">
-          <input class="qinp" id="qPrice" type="text" readonly>
-          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--muted);font-family:var(--mono)">Market: <span id="qMkt">--</span></span>
-        </div>
-
-        <div class="ql">Total (USDT)</div>
-        <div style="position:relative;margin-bottom:10px">
-          <input class="qinp" id="qTotal" type="text" readonly>
-          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--muted);font-family:var(--mono)">Fee: 0.25%</span>
-        </div>
-
-        <div class="pinfo">
-          <div class="prow"><span>Rate</span><span id="qRate">--</span></div>
-          <div class="prow"><span>Price Impact</span><span style="color:var(--accent)">~0.05%</span></div>
-          <div class="prow"><span>Min Received</span><span id="qMin">--</span></div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <button class="execbtn b" onclick="exec('BUY')">▲ BUY</button>
-          <button class="execbtn s" onclick="exec('SELL')">▼ SELL</button>
-        </div>
-      </div>
-
-      <!-- JUPITER SWAP — লোগো সহ স্বাভাবিকভাবে -->
-      <div id="jup-wrap">
-        <div class="jlbl">Advanced Swap</div>
-        <div id="jup-container"></div>
-      </div>
+    <!-- Network Info -->
+    <div class="netcard">
+      <div class="nctitle">Network Info</div>
+      <div class="ncrow"><span>SOL Price</span><span id="q_sol" class="g">$--</span></div>
+      <div class="ncrow"><span>Aggregator</span><span style="color:var(--accent)">Jupiter Ultra</span></div>
+      <div class="ncrow"><span>Liquidity Sources</span><span>30+ DEXs</span></div>
+      <div class="ncrow"><span>Token List</span><span style="color:var(--accent)">400,000+ tokens</span></div>
+      <div class="ncrow"><span>Network</span><span>Solana Mainnet</span></div>
+      <div class="ncrow"><span>TPS</span><span id="q_tps">--</span></div>
     </div>
 
   </div>
 
 </main>
 
-<footer>Powered by <b>RialoSwap</b> · Built on <b>Solana</b> · Real transactions via Solana Aggregator Protocol</footer>
+<footer>Powered by <b>RialoSwap</b> · Swap engine by <b>Jupiter Protocol</b> · Built on <b>Solana</b></footer>
 
 <script>
-// ═══════════════════════════════════════
-// JUPITER TERMINAL INIT
-// ═══════════════════════════════════════
-const RPC = 'https://mainnet.helius-rpc.com/?api-key=0f157c08-0320-4aeb-9db1-3dfeaccb38fd';
-
-window.addEventListener('load', () => {
-  if (window.Jupiter) {
-    window.Jupiter.init({
-      displayMode: 'integrated',
-      integratedTargetId: 'jup-container',
-      endpoint: RPC,
-      defaultExplorer: 'Solana Explorer',
-      strictTokenList: false,
-      formProps: {
-        initialInputMint: 'So11111111111111111111111111111111111111112',
-        initialOutputMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-        initialSlippageBps: 50,
-      },
-    });
+// ═══════════════════════════════════════════════════════
+// JUPITER PLUGIN v1 — OFFICIAL INIT
+// Docs: https://dev.jup.ag/tool-kits/plugin
+// CDN:  https://plugin.jup.ag/plugin-v1.js
+//
+// Key improvements over old terminal/main-v3.js:
+//  - Uses Ultra mode (RPC-less — no endpoint needed)
+//  - Full 400k+ token list built-in
+//  - Unified Wallet Kit built-in (Phantom, Solflare, Backpack, etc.)
+//  - Auto slippage & fee estimation
+// ═══════════════════════════════════════════════════════
+function initJupiterPlugin() {
+  if (!window.Jupiter) {
+    setTimeout(initJupiterPlugin, 200);
+    return;
   }
-});
+
+  window.Jupiter.init({
+    displayMode: 'integrated',
+    integratedTargetId: 'jup-plugin-container',
+    // ✅ No endpoint required — Ultra handles everything
+    defaultExplorer: 'Solscan',
+    formProps: {
+      initialInputMint:  'So11111111111111111111111111111111111111112',   // SOL
+      initialOutputMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
+    },
+    onSuccess: ({ txid, swapResult }) => {
+      toast('✅ Swap success! TX: ' + txid.slice(0,8) + '...');
+      console.log('Swap success', { txid, swapResult });
+    },
+    onSwapError: ({ error }) => {
+      toast('⚠️ ' + (error?.message || 'Swap failed'));
+    },
+  });
+}
+
+// Wait for defer script to load
+if (document.readyState === 'complete') {
+  initJupiterPlugin();
+} else {
+  window.addEventListener('load', initJupiterPlugin);
+}
 
 // ═══════════════════════════════════════
-// CHART
+// CHART ENGINE
 // ═══════════════════════════════════════
 let chart, cs, candles = [];
+let currentPrice = 0;
 
 function initChart(basePrice) {
   const el = document.getElementById('chartDiv');
-  if (chart) { chart.remove(); }
+  if (chart) chart.remove();
   chart = LightweightCharts.createChart(el, {
-    width: el.clientWidth,
-    height: 290,
+    width: el.clientWidth, height: 290,
     layout: { background: { color: '#0d1520' }, textColor: '#dff0ec' },
     grid: { vertLines: { color: 'rgba(0,220,180,0.05)' }, horzLines: { color: 'rgba(0,220,180,0.05)' } },
     crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
     rightPriceScale: { borderColor: 'rgba(0,220,180,0.15)' },
     timeScale: { borderColor: 'rgba(0,220,180,0.15)', timeVisible: true, secondsVisible: false },
-    handleScroll: true,
-    handleScale: true,
+    handleScroll: true, handleScale: true,
   });
   cs = chart.addCandlestickSeries({
-    upColor: '#00dcb4', downColor: '#ff4560',
-    borderUpColor: '#00dcb4', borderDownColor: '#ff4560',
-    wickUpColor: '#00dcb4', wickDownColor: '#ff4560',
+    upColor:'#00dcb4', downColor:'#ff4560',
+    borderUpColor:'#00dcb4', borderDownColor:'#ff4560',
+    wickUpColor:'#00dcb4', wickDownColor:'#ff4560',
   });
-  candles = genCandles(basePrice || 100, 120, 60);
+  candles = genCandles(basePrice, 120, 60);
   cs.setData(candles);
   chart.timeScale().fitContent();
-
-  window.addEventListener('resize', () => {
-    if (chart) chart.applyOptions({ width: el.clientWidth });
-  });
+  window.addEventListener('resize', () => chart?.applyOptions({ width: el.clientWidth }));
 }
 
 function genCandles(base, count, iv) {
   const arr = []; let p = base;
-  const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now()/1000);
   for (let i = count; i >= 0; i--) {
-    const o = p;
-    const c = o + (Math.random() - 0.48) * (iv < 3600 ? base * 0.008 : base * 0.02);
-    arr.push({
-      time: now - i * iv,
-      open: o, close: c,
-      high: Math.max(o, c) + Math.random() * base * 0.003,
-      low: Math.min(o, c) - Math.random() * base * 0.003,
-    });
+    const o = p, c = o + (Math.random()-0.48) * (iv < 3600 ? base*0.008 : base*0.02);
+    arr.push({ time: now - i*iv, open:o, close:c,
+      high: Math.max(o,c) + Math.random()*base*0.003,
+      low:  Math.min(o,c) - Math.random()*base*0.003 });
     p = c;
   }
   return arr;
@@ -428,200 +359,118 @@ function genCandles(base, count, iv) {
 function setTF(btn, iv) {
   document.querySelectorAll('.tf').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
-  if (!chart) return;
-  candles = genCandles(currentPrice || 100, 120, iv);
-  cs.setData(candles);
-  chart.timeScale().fitContent();
+  if (!chart || !currentPrice) return;
+  candles = genCandles(currentPrice, 120, iv);
+  cs.setData(candles); chart.timeScale().fitContent();
 }
 
-// Live tick update
 setInterval(() => {
   if (!cs || !candles.length) return;
-  const last = candles[candles.length - 1];
-  const nc = last.close + (Math.random() - 0.48) * (currentPrice || 100) * 0.002;
-  const up = { time: last.time, open: last.open, high: Math.max(last.high, nc), low: Math.min(last.low, nc), close: nc };
-  candles[candles.length - 1] = up;
-  cs.update(up);
+  const last = candles[candles.length-1];
+  const nc = last.close + (Math.random()-0.48)*(currentPrice||150)*0.002;
+  const up = { time:last.time, open:last.open, high:Math.max(last.high,nc), low:Math.min(last.low,nc), close:nc };
+  candles[candles.length-1] = up; cs.update(up);
 }, 1500);
 
-// New candle every 60s
 setInterval(() => {
   if (!cs || !candles.length) return;
-  const last = candles[candles.length - 1];
-  const o = last.close;
-  const c = o + (Math.random() - 0.48) * (currentPrice || 100) * 0.008;
-  const nc = { time: last.time + 60, open: o, close: c, high: Math.max(o, c) + Math.random() * 0.5, low: Math.min(o, c) - Math.random() * 0.5 };
-  candles.push(nc);
-  cs.update(nc);
+  const last = candles[candles.length-1];
+  const o = last.close, c = o + (Math.random()-0.48)*(currentPrice||150)*0.008;
+  const nc = { time:last.time+60, open:o, close:c, high:Math.max(o,c)+Math.random()*0.5, low:Math.min(o,c)-Math.random()*0.5 };
+  candles.push(nc); cs.update(nc);
 }, 60000);
-
-// ═══════════════════════════════════════
-// WALLET
-// ═══════════════════════════════════════
-let connected = false;
-let currentPrice = 0;
-
-function openModal() { document.getElementById('wmodal').classList.add('show'); }
-function closeModal() { document.getElementById('wmodal').classList.remove('show'); }
-
-async function doConnect(name) {
-  closeModal();
-  if (name === 'Phantom' && window.solana?.isPhantom) {
-    try {
-      const r = await window.solana.connect();
-      const addr = r.publicKey.toString();
-      setWallet(addr.slice(0, 4) + '...' + addr.slice(-4));
-      toast('✓ Phantom wallet connected!');
-      return;
-    } catch (e) {
-      toast('⚠ Connection rejected'); return;
-    }
-  }
-  setWallet(name.slice(0, 3) + '7x...k9P');
-  toast('✓ ' + name + ' connected!');
-}
-
-function setWallet(label) {
-  connected = true;
-  const b = document.getElementById('cwBtn');
-  b.textContent = '● ' + label;
-  b.classList.add('on');
-  document.getElementById('qAvail').textContent = 'Available: 12.50 SOL';
-}
-
-// ═══════════════════════════════════════
-// QUICK TRADE
-// ═══════════════════════════════════════
-let activeTab = 'buy';
-function swTab(t) {
-  activeTab = t;
-  document.getElementById('tabBuy').className = 'qt-tab buy' + (t === 'buy' ? ' on' : '');
-  document.getElementById('tabSell').className = 'qt-tab sell' + (t === 'sell' ? ' on' : '');
-}
-
-function calcQ() {
-  const amt = parseFloat(document.getElementById('qAmt').value) || 0;
-  if (!amt || !currentPrice) return;
-  const total = amt * currentPrice;
-  document.getElementById('qPrice').value = currentPrice.toFixed(4);
-  document.getElementById('qTotal').value = total.toFixed(4);
-  document.getElementById('qMkt').textContent = currentPrice.toFixed(2);
-  document.getElementById('qRate').textContent = currentPrice.toFixed(2) + ' USDT/SOL';
-  document.getElementById('qMin').textContent = (total * 0.995).toFixed(4) + ' USDT';
-}
-
-function exec(type) {
-  if (!connected) { openModal(); return; }
-  const amt = parseFloat(document.getElementById('qAmt').value);
-  if (!amt || amt <= 0) { toast('⚠ Enter an amount'); return; }
-  toast('⏳ Broadcasting to Solana mainnet...');
-  setTimeout(() => toast('✓ ' + type + ' order executed! Check your wallet'), 2200);
-}
 
 // ═══════════════════════════════════════
 // LIVE PRICES
 // ═══════════════════════════════════════
 const PAIRS = [
-  { id: 'solana',    sym: 'SOL',  pair: 'SOL/USDT' },
-  { id: 'bitcoin',   sym: 'BTC',  pair: 'BTC/USDT' },
-  { id: 'ethereum',  sym: 'ETH',  pair: 'ETH/USDT' },
-  { id: 'dogwifhat', sym: 'WIF',  pair: 'WIF/USDT' },
-  { id: 'bonk',      sym: 'BONK', pair: 'BONK/USDT' },
+  { id:'solana',               sym:'SOL',  pair:'SOL/USDC'  },
+  { id:'bitcoin',              sym:'BTC',  pair:'BTC/USDC'  },
+  { id:'ethereum',             sym:'ETH',  pair:'ETH/USDC'  },
+  { id:'dogwifhat',            sym:'WIF',  pair:'WIF/USDC'  },
+  { id:'bonk',                 sym:'BONK', pair:'BONK/USDC' },
+  { id:'jito-governance-token',sym:'JTO',  pair:'JTO/USDC'  },
+  { id:'raydium',              sym:'RAY',  pair:'RAY/USDC'  },
 ];
 
 async function fetchPrices() {
   try {
-    const ids = PAIRS.map(p => p.id).join(',');
-    const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    const pairEl = document.getElementById('pairList');
-    pairEl.innerHTML = '';
+    const ids = PAIRS.map(p=>p.id).join(',');
+    const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h`);
+    const data = await r.json();
+    const pEl = document.getElementById('pairList');
+    pEl.innerHTML = '';
 
     data.forEach((coin, i) => {
       const pair = PAIRS.find(p => p.id === coin.id);
       if (!pair) return;
-
-      const p = coin.current_price;
-      const ch = coin.price_change_percentage_24h || 0;
-      const pos = ch >= 0;
-      const fmt = p > 1000 ? '$' + (p / 1000).toFixed(2) + 'k' : p > 1 ? '$' + p.toFixed(2) : '$' + p.toFixed(6);
+      const p = coin.current_price, ch = coin.price_change_percentage_24h || 0, pos = ch >= 0;
+      const fmt = p > 1000 ? '$'+(p/1000).toFixed(2)+'k' : p > 1 ? '$'+p.toFixed(2) : '$'+p.toFixed(6);
 
       if (coin.id === 'solana') {
         currentPrice = p;
-        document.getElementById('sPrice').textContent = '$' + p.toFixed(2);
-        document.getElementById('sChg').textContent = (pos ? '+' : '') + ch.toFixed(2) + '%';
-        document.getElementById('sChg').style.color = pos ? 'var(--accent)' : 'var(--red)';
-        document.getElementById('liveP').textContent = '$' + p.toFixed(2);
-        document.getElementById('liveC').textContent = (pos ? '+' : '') + ch.toFixed(2) + '%';
-        document.getElementById('liveC').style.color = pos ? 'var(--accent)' : 'var(--red)';
-        document.getElementById('sMkt').textContent = '$' + (coin.market_cap / 1e9).toFixed(1) + 'B';
-        document.getElementById('iMkt').textContent = '$' + (coin.market_cap / 1e9).toFixed(1) + 'B';
-        document.getElementById('iRsi').textContent = (40 + Math.random() * 20).toFixed(1);
-        const mv = (Math.random() - 0.5).toFixed(2);
-        document.getElementById('iMacd').textContent = mv;
-        document.getElementById('iMacd').style.color = mv > 0 ? 'var(--accent)' : 'var(--red)';
-        document.getElementById('qMkt').textContent = p.toFixed(2);
-        document.getElementById('qPrice').value = p.toFixed(4);
-
+        document.getElementById('sPrice').textContent = '$'+p.toFixed(2);
+        document.getElementById('sChg').textContent   = (pos?'+':'')+ch.toFixed(2)+'%';
+        document.getElementById('sChg').style.color   = pos?'var(--accent)':'var(--red)';
+        document.getElementById('liveP').textContent  = '$'+p.toFixed(2);
+        document.getElementById('liveC').textContent  = (pos?'+':'')+ch.toFixed(2)+'%';
+        document.getElementById('liveC').style.color  = pos?'var(--accent)':'var(--red)';
+        document.getElementById('sMkt').textContent   = '$'+(coin.market_cap/1e9).toFixed(1)+'B';
+        document.getElementById('iMkt').textContent   = '$'+(coin.market_cap/1e9).toFixed(1)+'B';
+        document.getElementById('iVol').textContent   = '$'+(coin.total_volume/1e9).toFixed(2)+'B';
+        document.getElementById('iRsi').textContent   = (40+Math.random()*20).toFixed(1);
+        const mv = (Math.random()-0.5).toFixed(2);
+        document.getElementById('iMacd').textContent  = mv;
+        document.getElementById('iMacd').style.color  = mv>0?'var(--accent)':'var(--red)';
+        document.getElementById('q_sol').textContent  = '$'+p.toFixed(2);
         if (!chart) initChart(p);
-        calcQ();
       }
 
-      pairEl.innerHTML += `
-        <div class="titem ${i === 0 ? 'on' : ''}" onclick="selectPair(this,'${pair.pair}','${coin.image}')">
-          <img src="${coin.image}" alt="${pair.sym}"
-            onerror="this.src='https://assets.coingecko.com/coins/images/1/small/bitcoin.png'">
+      pEl.innerHTML += `
+        <div class="titem ${i===0?'on':''}" onclick="selectPair(this,'${pair.pair}','${coin.image}')">
+          <img src="${coin.image}" alt="${pair.sym}" onerror="this.src='https://assets.coingecko.com/coins/images/1/small/bitcoin.png'">
           <div class="tii">
             <div class="tis">${pair.pair}</div>
-            <div class="tip ${pos ? 'g' : 'rr'}">${fmt}</div>
-            <div class="tic ${pos ? 'g' : 'rr'}">${pos ? '+' : ''}${ch.toFixed(2)}%</div>
+            <div class="tip ${pos?'g':'rr'}">${fmt}</div>
+            <div class="tic ${pos?'g':'rr'}">${pos?'+':''}${ch.toFixed(2)}%</div>
           </div>
         </div>`;
     });
 
-    document.getElementById('sVol').textContent = '$' + (1.2 + Math.random() * 0.6).toFixed(1) + 'B';
-    document.getElementById('sTps').textContent = (2800 + Math.floor(Math.random() * 400)).toLocaleString();
-
-  } catch (e) {
-    console.log('Price error:', e);
-  }
+    const tps = 2800+Math.floor(Math.random()*400);
+    document.getElementById('sVol').textContent = '$'+(1.2+Math.random()*0.6).toFixed(1)+'B';
+    document.getElementById('sTps').textContent = tps.toLocaleString();
+    document.getElementById('q_tps').textContent = tps.toLocaleString()+' tx/s';
+  } catch(e) { console.warn('Price fetch error',e); }
 }
 
 function selectPair(el, pair, img) {
-  document.querySelectorAll('.titem').forEach(r => r.classList.remove('on'));
+  document.querySelectorAll('.titem').forEach(r=>r.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('pairName').textContent = pair;
   document.getElementById('pLogo1').src = img;
 }
 
 fetchPrices();
-setInterval(fetchPrices, 15000);
+setInterval(fetchPrices, 20000);
 
 // ═══════════════════════════════════════
-// LIVE TRADES
+// LIVE TRADE FEED
 // ═══════════════════════════════════════
 function addTrade() {
-  const buy = Math.random() > 0.5;
-  const p = currentPrice ? (currentPrice + (Math.random() - 0.5) * 0.5).toFixed(4) : (100 + Math.random() * 2).toFixed(4);
-  const a = (0.1 + Math.random() * 5).toFixed(2);
+  const buy = Math.random()>0.5;
+  const p = currentPrice ? (currentPrice+(Math.random()-0.5)*0.5).toFixed(4) : (150+Math.random()*2).toFixed(4);
+  const a = (0.1+Math.random()*5).toFixed(2);
   const now = new Date();
-  const t = now.getHours().toString().padStart(2, '0') + ':' +
-    now.getMinutes().toString().padStart(2, '0') + ':' +
-    now.getSeconds().toString().padStart(2, '0');
+  const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
   const list = document.getElementById('tradeList');
   const row = document.createElement('div');
   row.className = 'trow';
-  row.innerHTML = `
-    <span class="${buy ? 'g' : 'rr'}">${buy ? 'BUY' : 'SELL'}</span>
-    <span class="${buy ? 'g' : 'rr'}">${p}</span>
-    <span>${a}</span>
-    <span style="color:var(--muted)">${t}</span>`;
+  row.innerHTML = `<span class="${buy?'g':'rr'}">${buy?'BUY':'SELL'}</span><span class="${buy?'g':'rr'}">${p}</span><span>${a} SOL</span><span style="color:var(--muted)">${t}</span>`;
   list.insertBefore(row, list.firstChild);
-  if (list.children.length > 12) list.removeChild(list.lastChild);
+  if (list.children.length > 15) list.removeChild(list.lastChild);
 }
-for (let i = 0; i < 8; i++) addTrade();
+for(let i=0;i<12;i++) addTrade();
 setInterval(addTrade, 1800);
 
 // ═══════════════════════════════════════
@@ -631,7 +480,7 @@ function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3500);
+  setTimeout(()=>el.classList.remove('show'), 4000);
 }
 </script>
 </body>
