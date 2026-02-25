@@ -178,35 +178,55 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
   border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;
   vertical-align:middle;margin-right:6px}
 
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+/* ── Wallet Modal — BULK style ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:800;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(14px)}
 .overlay.show{display:flex}
-.modal-box{background:linear-gradient(145deg, #0f1825 0%, #0d1520 100%);
-  border:1px solid var(--border);border-radius:16px;
-  padding:28px;width:360px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
-.modal-title{font-size:1.1rem;font-weight:800;letter-spacing:1px;margin-bottom:6px;
-  background:linear-gradient(120deg,var(--accent2),var(--accent));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.modal-sub{font-size:0.72rem;color:var(--muted);margin-bottom:20px}
-.w-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:10px;
-  border:1px solid var(--border);background:rgba(255,255,255,0.02);
-  cursor:pointer;margin-bottom:10px;transition:.2s;position:relative;overflow:hidden}
-.w-opt::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,220,180,0.05),transparent);
-  transform:translateX(-100%);transition:.5s}
-.w-opt:hover::before{transform:translateX(100%)}
-.w-opt:hover{background:rgba(0,220,180,0.06);border-color:rgba(0,220,180,0.4);transform:translateX(4px)}
-.w-opt.checking{opacity:0.6;pointer-events:none}
-.w-opt.checking::after{content:'⏳';position:absolute;right:16px;font-size:1.2rem}
-.w-icon{width:42px;height:42px;border-radius:10px;object-fit:contain;
-  background:rgba(255,255,255,0.08);padding:6px;flex-shrink:0}
+.modal-box{background:#1c1c1c;border:1px solid rgba(255,255,255,0.07);
+  border-radius:22px;padding:30px 22px 22px;width:370px;max-width:93vw;
+  box-shadow:0 24px 70px rgba(0,0,0,0.75);animation:modal-pop .2s ease}
+@keyframes modal-pop{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
+.modal-logo{display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:1.9rem;font-weight:800;letter-spacing:2px;color:#fff;margin-bottom:22px}
+.modal-title{font-size:1.05rem;font-weight:700;color:#fff;text-align:center;margin-bottom:18px}
+.w-opt{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:13px;
+  border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.03);
+  cursor:pointer;margin-bottom:9px;transition:.18s;position:relative}
+.w-opt:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.2);transform:translateY(-1px)}
+.w-opt:active{transform:translateY(0)}
+.w-opt.checking{opacity:.5;pointer-events:none}
+.w-opt.checking::after{content:'';position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  width:15px;height:15px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite}
+.w-icon{width:40px;height:40px;border-radius:10px;object-fit:contain;flex-shrink:0}
 .w-info{flex:1}
-.w-name{font-size:0.85rem;font-weight:700;margin-bottom:2px}
-.w-desc{font-size:0.62rem;color:var(--muted)}
-.w-status{font-size:0.58rem;color:var(--accent);margin-top:2px}
-.modal-cancel{width:100%;padding:11px;border-radius:8px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-family:var(--font);font-size:0.75rem;
-  cursor:pointer;margin-top:8px;transition:.2s;font-weight:600;letter-spacing:0.5px}
-.modal-cancel:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,220,180,0.05)}
+.w-name{font-size:0.88rem;font-weight:600;color:#fff}
+.w-desc{font-size:0.62rem;color:rgba(255,255,255,0.32);margin-top:2px}
+.w-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 5px #22c55e;position:absolute;top:12px;left:46px}
+.w-email-row{display:flex;align-items:center;border-radius:13px;
+  border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.03);
+  margin-bottom:9px;overflow:hidden;transition:.18s}
+.w-email-row:focus-within{border-color:rgba(255,255,255,0.22)}
+.w-email-ico{width:40px;height:40px;border-radius:9px;background:rgba(255,255,255,0.07);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  margin:10px 8px 10px 12px;flex-shrink:0}
+.w-email-inp{flex:1;background:transparent;border:none;outline:none;
+  color:#fff;font-size:0.86rem;padding:14px 0}
+.w-email-inp::placeholder{color:rgba(255,255,255,0.22)}
+.w-email-sub{padding:8px 13px;margin:8px;border-radius:8px;border:none;
+  background:rgba(255,255,255,0.11);color:#fff;font-size:0.7rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:.18s}
+.w-email-sub:hover{background:rgba(255,255,255,0.2)}
+.modal-privy{display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:14px;font-size:0.66rem;color:rgba(255,255,255,0.22)}
+.modal-privy-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.28)}
+.modal-privy b{color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.5px}
+.modal-cancel{width:100%;padding:10px;border-radius:10px;
+  border:1px solid rgba(255,255,255,0.07);background:transparent;
+  color:rgba(255,255,255,0.3);font-family:var(--font);font-size:0.73rem;
+  cursor:pointer;margin-top:4px;transition:.18s}
+.modal-cancel:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.6)}
 
 .slip-box{background:#0d1520;border:1px solid var(--border);border-radius:12px;
   padding:22px;width:290px}
@@ -266,9 +286,15 @@ footer b{color:var(--accent)}
 
 <div class="overlay" id="walletModal">
   <div class="modal-box">
-    <div class="modal-title">Connect Wallet</div>
-    <div class="modal-sub">Choose your Solana wallet to continue</div>
+    <div class="modal-logo">✦ BULK</div>
+    <div class="modal-title">Log in or sign up</div>
     <div id="walletOptions"></div>
+    <div class="w-email-row">
+      <div class="w-email-ico">✉</div>
+      <input class="w-email-inp" id="emailInp" type="email" placeholder="your@email.com">
+      <button class="w-email-sub" onclick="doEmailLogin()">Submit</button>
+    </div>
+    <div class="modal-privy">Protected by <div class="modal-privy-dot"></div> <b>privy</b></div>
     <button class="modal-cancel" onclick="closeWalletModal()">Cancel</button>
   </div>
 </div>
@@ -472,21 +498,35 @@ let quoteDebounce = null;
 let currentPrice = 0;
 let tkTarget = 'in';
 
+const WALLET_ICONS = {
+  Phantom: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#534BB1"/><path d="M32 20c0 6.627-5.373 12-12 12S8 26.627 8 20 13.373 8 20 8s12 5.373 12 12z" fill="#AB9FF2"/><ellipse cx="16.5" cy="20" rx="2" ry="2.5" fill="white"/><ellipse cx="23.5" cy="20" rx="2" ry="2.5" fill="white"/></svg>`,
+  Solflare: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#FC7227"/><polygon points="20,9 31,22 20,31 9,22" fill="white" opacity="0.9"/><polygon points="20,14 27,22 20,27 13,22" fill="#FC7227"/></svg>`,
+  Backpack: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#E33D3D"/><rect x="13" y="16" width="14" height="13" rx="3" fill="white"/><rect x="16" y="12" width="8" height="6" rx="2" fill="white" opacity="0.75"/><rect x="16" y="21" width="8" height="2" rx="1" fill="#E33D3D"/></svg>`,
+  'Other wallets': `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#2a2a2a"/><rect x="10" y="17" width="20" height="12" rx="3" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/><rect x="10" y="14" width="13" height="5" rx="2" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/><circle cx="27" cy="23" r="2" fill="rgba(255,255,255,0.45)"/></svg>`,
+};
+
 function renderWalletOptions() {
   const container = document.getElementById('walletOptions');
   container.innerHTML = WALLETS.map(w => {
     const installed = w.check();
     return `
-      <div class="w-opt ${!installed?'':''}  " onclick="doConnect('${w.name}', ${installed})" data-wallet="${w.name}">
-        <img class="w-icon" src="${w.icon}" alt="${w.name}">
+      <div class="w-opt" onclick="doConnect('${w.name}', ${installed})" data-wallet="${w.name}">
+        ${WALLET_ICONS[w.name] || `<img class="w-icon" src="${w.icon}" alt="${w.name}">`}
+        ${installed ? '<div class="w-dot"></div>' : ''}
         <div class="w-info">
           <div class="w-name">${w.name}</div>
-          <div class="w-desc">${installed ? 'Detected' : 'Not installed'}</div>
-          ${!installed ? '<div class="w-status">Click to install</div>' : ''}
+          <div class="w-desc">${installed ? 'Detected' : w.name === 'Other wallets' ? 'WalletConnect & more' : 'Not installed — click to install'}</div>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
+}
+
+function doEmailLogin() {
+  const email = document.getElementById('emailInp').value.trim();
+  if (!email || !email.includes('@')) { showToast('Enter a valid email', true); return; }
+  showToast('Magic link sent to ' + email);
+  document.getElementById('emailInp').value = '';
+  closeWalletModal();
 }
 
 function openWalletModal() {
