@@ -154,24 +154,12 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
 .execbtn:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(0,220,180,0.3)}
 .execbtn.s:hover{box-shadow:0 5px 18px rgba(255,69,96,0.3)}
 
-/* JUPITER — hide their logo/name with CSS */
+/* JUPITER */
 #jup-wrap{border-top:1px solid var(--border)}
 .jlbl{padding:9px 14px;font-size:0.6rem;font-weight:700;letter-spacing:2px;
   text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
 .jlbl::before{content:'';width:3px;height:10px;background:var(--accent);border-radius:2px}
 #jup-container{min-height:380px}
-
-/* Hide Jupiter branding inside iframe/container */
-#jup-container ._3_zjF,
-#jup-container [class*="PoweredBy"],
-#jup-container [class*="powered-by"],
-#jup-container [class*="poweredBy"],
-#jup-container [class*="jup-logo"],
-#jup-container [class*="jupLogo"],
-#jup-container footer,
-#jup-container [class*="Footer"],
-#jup-container [class*="Brand"],
-#jup-container [class*="brand"]{display:none!important;height:0!important;overflow:hidden!important}
 
 /* WALLET MODAL */
 .moverlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;
@@ -351,20 +339,9 @@ footer b{color:var(--accent)}
         </div>
       </div>
 
-      <!-- JUPITER SWAP with logo hidden via overlay -->
-      <div id="jup-wrap" style="position:relative">
+      <!-- JUPITER SWAP — লোগো সহ স্বাভাবিকভাবে -->
+      <div id="jup-wrap">
         <div class="jlbl">Advanced Swap</div>
-        <!-- Logo blocker overlay - covers exactly where Jupiter logo appears -->
-        <div id="logo-blocker" style="
-          position:absolute;
-          top:50px;
-          left:0;
-          width:52px;
-          height:52px;
-          background:var(--card);
-          z-index:999;
-          border-radius:0;
-        "></div>
         <div id="jup-container"></div>
       </div>
     </div>
@@ -395,60 +372,6 @@ window.addEventListener('load', () => {
         initialSlippageBps: 50,
       },
     });
-
-    // Hide Jupiter branding - run multiple times to catch after render
-    function hideJupBranding() {
-      const style = document.createElement('style');
-      style.textContent = `
-        /* Hide Jupiter logo and all branding */
-        #jup-container img[src*="jup"],
-        #jup-container img[alt*="Jupiter"],
-        #jup-container img[alt*="jup"],
-        #jup-container [class*="logo"],
-        #jup-container [class*="Logo"],
-        #jup-container [class*="brand"],
-        #jup-container [class*="Brand"],
-        #jup-container [class*="PoweredBy"],
-        #jup-container [class*="powered"],
-        #jup-container [class*="header-logo"],
-        #jup-container svg:first-child,
-        #jup-container > div > div > div:first-child > div:first-child > a,
-        #jup-container > div > div > div:first-child img,
-        #jup-container a[href*="jup.ag"],
-        #jup-container a[href*="jupiter"],
-        #jup-container [class*="jup-gradient"],
-        #jup-container [class*="Jupiter"]
-        { display:none!important; visibility:hidden!important; opacity:0!important; width:0!important; height:0!important; overflow:hidden!important; }
-      `;
-      document.head.appendChild(style);
-
-      // Also try direct DOM hiding
-      const container = document.getElementById('jup-container');
-      if (!container) return;
-      
-      // Hide any img tags that look like Jupiter logo
-      container.querySelectorAll('img').forEach(img => {
-        if(img.src && (img.src.includes('jup') || img.alt?.toLowerCase().includes('jupiter'))) {
-          img.style.display = 'none';
-        }
-      });
-      
-      // Hide first SVG in header area (Jupiter logo is usually SVG)
-      const svgs = container.querySelectorAll('header svg, nav svg, div > svg');
-      svgs.forEach(svg => { svg.style.display = 'none'; });
-      
-      // Hide any links to jup.ag
-      container.querySelectorAll('a').forEach(a => {
-        if(a.href && a.href.includes('jup.ag')) a.style.display = 'none';
-      });
-    }
-    
-    setTimeout(hideJupBranding, 1000);
-    setTimeout(hideJupBranding, 2000);
-    setTimeout(hideJupBranding, 4000);
-    setTimeout(hideJupBranding, 6000);
-    // Keep running every 5 seconds in case of re-renders
-    setInterval(hideJupBranding, 5000);
   }
 });
 
@@ -625,7 +548,6 @@ async function fetchPrices() {
       const pos = ch >= 0;
       const fmt = p > 1000 ? '$' + (p / 1000).toFixed(2) + 'k' : p > 1 ? '$' + p.toFixed(2) : '$' + p.toFixed(6);
 
-      // Update stats for SOL
       if (coin.id === 'solana') {
         currentPrice = p;
         document.getElementById('sPrice').textContent = '$' + p.toFixed(2);
@@ -643,7 +565,6 @@ async function fetchPrices() {
         document.getElementById('qMkt').textContent = p.toFixed(2);
         document.getElementById('qPrice').value = p.toFixed(4);
 
-        // Init chart with real price
         if (!chart) initChart(p);
         calcQ();
       }
