@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+<script src="https://www.unpkg.com/@aiternate/solana-wallet-adapter-light"></script>
 
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -178,55 +179,60 @@ main{position:relative;z-index:1;max-width:1340px;margin:0 auto;padding:14px 16p
   border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;
   vertical-align:middle;margin-right:6px}
 
-/* ── Wallet Modal — BULK style ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:800;
-  display:none;align-items:center;justify-content:center;backdrop-filter:blur(14px)}
+/* wallet-adapter-light modal overrides */
+.wallet-adapter-modal-overlay{background:rgba(0,0,0,0.82) !important;backdrop-filter:blur(14px)}
+.wallet-adapter-modal-wrapper{
+  background:#1c1c1c !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  border-radius:20px !important;
+  padding:28px 20px 20px !important;
+  box-shadow:0 24px 70px rgba(0,0,0,0.75) !important;
+  max-width:380px !important; width:92vw !important}
+.wallet-adapter-modal-title{
+  font-size:1rem !important;font-weight:700 !important;
+  color:#fff !important;text-align:center !important;
+  margin-bottom:16px !important}
+.wallet-adapter-modal-list{list-style:none !important;padding:0 !important;margin:0 !important}
+.wallet-adapter-modal-list li{margin-bottom:8px !important}
+.wallet-adapter-button{
+  width:100% !important;display:flex !important;align-items:center !important;
+  gap:13px !important;padding:12px 15px !important;border-radius:13px !important;
+  border:1px solid rgba(255,255,255,0.09) !important;
+  background:rgba(255,255,255,0.03) !important;
+  cursor:pointer !important;transition:.18s !important;
+  font-size:0.88rem !important;font-weight:600 !important;color:#fff !important;
+  font-family:'Syne',sans-serif !important}
+.wallet-adapter-button:hover{
+  background:rgba(255,255,255,0.08) !important;
+  border-color:rgba(255,255,255,0.22) !important;
+  transform:translateY(-1px) !important}
+.wallet-adapter-button-start-icon img{
+  width:38px !important;height:38px !important;border-radius:9px !important}
+.wallet-adapter-button span{
+  font-size:0.6rem !important;color:#22c55e !important;
+  background:rgba(34,197,94,0.12) !important;
+  padding:2px 7px !important;border-radius:20px !important;margin-left:auto !important}
+.wallet-adapter-modal-button-close{
+  position:absolute !important;top:14px !important;right:14px !important;
+  background:rgba(255,255,255,0.07) !important;border:none !important;
+  border-radius:50% !important;width:28px !important;height:28px !important;
+  cursor:pointer !important;color:rgba(255,255,255,0.5) !important;
+  display:flex !important;align-items:center !important;justify-content:center !important}
+/* Hide default overlay — we use our own */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;
+  display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
 .overlay.show{display:flex}
 .modal-box{background:#1c1c1c;border:1px solid rgba(255,255,255,0.07);
-  border-radius:22px;padding:30px 22px 22px;width:370px;max-width:93vw;
+  border-radius:20px;padding:28px 20px 20px;width:370px;max-width:93vw;
   box-shadow:0 24px 70px rgba(0,0,0,0.75);animation:modal-pop .2s ease}
-@keyframes modal-pop{from{opacity:0;transform:scale(.95) translateY(8px)}to{opacity:1;transform:none}}
-.modal-logo{display:flex;align-items:center;justify-content:center;gap:8px;
-  font-size:1.9rem;font-weight:800;letter-spacing:2px;color:#fff;margin-bottom:22px}
-.modal-title{font-size:1.05rem;font-weight:700;color:#fff;text-align:center;margin-bottom:18px}
-.w-opt{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:13px;
-  border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.03);
-  cursor:pointer;margin-bottom:9px;transition:.18s;position:relative}
-.w-opt:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.2);transform:translateY(-1px)}
-.w-opt:active{transform:translateY(0)}
-.w-opt.checking{opacity:.5;pointer-events:none}
-.w-opt.checking::after{content:'';position:absolute;right:15px;top:50%;transform:translateY(-50%);
-  width:15px;height:15px;border:2px solid rgba(255,255,255,0.25);border-top-color:#fff;
-  border-radius:50%;animation:spin .7s linear infinite}
-.w-icon{width:40px;height:40px;border-radius:10px;object-fit:contain;flex-shrink:0}
-.w-info{flex:1}
-.w-name{font-size:0.88rem;font-weight:600;color:#fff}
-.w-desc{font-size:0.62rem;color:rgba(255,255,255,0.32);margin-top:2px}
-.w-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;
-  box-shadow:0 0 5px #22c55e;position:absolute;top:12px;left:46px}
-.w-email-row{display:flex;align-items:center;border-radius:13px;
-  border:1px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.03);
-  margin-bottom:9px;overflow:hidden;transition:.18s}
-.w-email-row:focus-within{border-color:rgba(255,255,255,0.22)}
-.w-email-ico{width:40px;height:40px;border-radius:9px;background:rgba(255,255,255,0.07);
-  display:flex;align-items:center;justify-content:center;font-size:1rem;
-  margin:10px 8px 10px 12px;flex-shrink:0}
-.w-email-inp{flex:1;background:transparent;border:none;outline:none;
-  color:#fff;font-size:0.86rem;padding:14px 0}
-.w-email-inp::placeholder{color:rgba(255,255,255,0.22)}
-.w-email-sub{padding:8px 13px;margin:8px;border-radius:8px;border:none;
-  background:rgba(255,255,255,0.11);color:#fff;font-size:0.7rem;font-weight:700;
-  cursor:pointer;white-space:nowrap;transition:.18s}
-.w-email-sub:hover{background:rgba(255,255,255,0.2)}
-.modal-privy{display:flex;align-items:center;justify-content:center;gap:6px;
-  margin-top:14px;font-size:0.66rem;color:rgba(255,255,255,0.22)}
-.modal-privy-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.28)}
-.modal-privy b{color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.5px}
+@keyframes modal-pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.modal-title{font-size:1rem;font-weight:700;color:#fff;text-align:center;margin-bottom:16px}
+.modal-sub{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-bottom:14px;text-align:center}
 .modal-cancel{width:100%;padding:10px;border-radius:10px;
   border:1px solid rgba(255,255,255,0.07);background:transparent;
   color:rgba(255,255,255,0.3);font-family:var(--font);font-size:0.73rem;
-  cursor:pointer;margin-top:4px;transition:.18s}
-.modal-cancel:hover{border-color:rgba(255,255,255,0.18);color:rgba(255,255,255,0.6)}
+  cursor:pointer;margin-top:8px;transition:.18s}
+.modal-cancel:hover{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.6)}
 
 .slip-box{background:#0d1520;border:1px solid var(--border);border-radius:12px;
   padding:22px;width:290px}
@@ -284,20 +290,7 @@ footer b{color:var(--accent)}
 </head>
 <body>
 
-<div class="overlay" id="walletModal">
-  <div class="modal-box">
-    <div class="modal-logo">✦ BULK</div>
-    <div class="modal-title">Log in or sign up</div>
-    <div id="walletOptions"></div>
-    <div class="w-email-row">
-      <div class="w-email-ico">✉</div>
-      <input class="w-email-inp" id="emailInp" type="email" placeholder="your@email.com">
-      <button class="w-email-sub" onclick="doEmailLogin()">Submit</button>
-    </div>
-    <div class="modal-privy">Protected by <div class="modal-privy-dot"></div> <b>privy</b></div>
-    <button class="modal-cancel" onclick="closeWalletModal()">Cancel</button>
-  </div>
-</div>
+<!-- SolanaConnectLight injects wallet modal automatically -->
 
 <div class="overlay" id="slipModal">
   <div class="slip-box">
@@ -452,40 +445,8 @@ footer b{color:var(--accent)}
 const RPC = 'https://api.mainnet-beta.solana.com';
 const JUP = 'https://quote-api.jup.ag/v6';
 
-const WALLETS = [
-  {
-    name: 'Phantom',
-    icon: 'data:image/svg+xml,%3Csvg fill="none" height="34" width="34" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M28 12.5C28 18.8513 23.2843 24 17.5 24 11.7157 24 7 18.8513 7 12.5S11.7157 1 17.5 1 28 6.14873 28 12.5Z" fill="%23AB9FF2"/%3E%3Cpath d="M14.5 11.5C14.5 12.3284 13.8284 13 13 13S11.5 12.3284 11.5 11.5 12.1716 10 13 10s1.5.6716 1.5 1.5ZM23.5 11.5c0 .8284-.6716 1.5-1.5 1.5s-1.5-.6716-1.5-1.5.6716-1.5 1.5-1.5 1.5.6716 1.5 1.5Z" fill="%23fff"/%3E%3C/svg%3E',
-    check: () => window.solana?.isPhantom
-  },
-  {
-    name: 'Solflare',
-    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="16" cy="16" fill="%23fc7227" r="16"/%3E%3Cpath d="m10 18 6-6 6 6" stroke="%23fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/%3E%3C/svg%3E',
-    check: () => window.solflare
-  },
-  {
-    name: 'Backpack',
-    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Crect fill="%23E33D3D" height="32" rx="8" width="32"/%3E%3Cpath d="M16 8l-6 6v8l6 4 6-4v-8l-6-6z" fill="%23fff"/%3E%3C/svg%3E',
-    check: () => window.backpack
-  },
-  {
-    name: 'Coinbase Wallet',
-    icon: 'data:image/svg+xml,%3Csvg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="16" cy="16" fill="%231652f0" r="16"/%3E%3Cpath d="M16 7c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" fill="%23fff"/%3E%3Cpath d="M13 14h6v4h-6z" fill="%23fff"/%3E%3C/svg%3E',
-    check: () => window.coinbaseSolana
-  }
-];
-
-const TOKENS = [
-  { sym:'SOL',  name:'Solana',       mint:'So11111111111111111111111111111111111111112',      dec:9, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png' },
-  { sym:'USDC', name:'USD Coin',     mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png' },
-  { sym:'USDT', name:'Tether USD',   mint:'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg' },
-  { sym:'BONK', name:'Bonk',         mint:'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', dec:5, img:'https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I' },
-  { sym:'WIF',  name:'dogwifhat',    mint:'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm', dec:6, img:'https://bafkreibk3covs5ltyqxa272uodhculbyfbbkznam6jfqhde7f3fxacuay.ipfs.nftstorage.link/' },
-  { sym:'RAY',  name:'Raydium',      mint:'4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png' },
-  { sym:'ORCA', name:'Orca',         mint:'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',  dec:6, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png' },
-  { sym:'JTO',  name:'Jito',         mint:'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQjx2v9iZpSej', dec:9, img:'https://metadata.jito.network/token/jto/image' },
-  { sym:'mSOL', name:'Marinade SOL', mint:'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So', dec:9, img:'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png' },
-];
+// ── SolanaConnectLight: Phantom, Solflare, Backpack, Bitget, Coin98, SafePal, Math, Ledger ──
+const solConnect = new window.SolanaConnectLight();
 
 let walletConnected = false;
 let walletPubkey = null;
@@ -498,135 +459,40 @@ let quoteDebounce = null;
 let currentPrice = 0;
 let tkTarget = 'in';
 
-const WALLET_ICONS = {
-  Phantom: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#534BB1"/><path d="M32 20c0 6.627-5.373 12-12 12S8 26.627 8 20 13.373 8 20 8s12 5.373 12 12z" fill="#AB9FF2"/><ellipse cx="16.5" cy="20" rx="2" ry="2.5" fill="white"/><ellipse cx="23.5" cy="20" rx="2" ry="2.5" fill="white"/></svg>`,
-  Solflare: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#FC7227"/><polygon points="20,9 31,22 20,31 9,22" fill="white" opacity="0.9"/><polygon points="20,14 27,22 20,27 13,22" fill="#FC7227"/></svg>`,
-  Backpack: `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#E33D3D"/><rect x="13" y="16" width="14" height="13" rx="3" fill="white"/><rect x="16" y="12" width="8" height="6" rx="2" fill="white" opacity="0.75"/><rect x="16" y="21" width="8" height="2" rx="1" fill="#E33D3D"/></svg>`,
-  'Other wallets': `<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="10" fill="#2a2a2a"/><rect x="10" y="17" width="20" height="12" rx="3" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/><rect x="10" y="14" width="13" height="5" rx="2" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/><circle cx="27" cy="23" r="2" fill="rgba(255,255,255,0.45)"/></svg>`,
-};
-
-function renderWalletOptions() {
-  const container = document.getElementById('walletOptions');
-  container.innerHTML = WALLETS.map(w => {
-    const installed = w.check();
-    return `
-      <div class="w-opt" onclick="doConnect('${w.name}', ${installed})" data-wallet="${w.name}">
-        ${WALLET_ICONS[w.name] || `<img class="w-icon" src="${w.icon}" alt="${w.name}">`}
-        ${installed ? '<div class="w-dot"></div>' : ''}
-        <div class="w-info">
-          <div class="w-name">${w.name}</div>
-          <div class="w-desc">${installed ? 'Detected' : w.name === 'Other wallets' ? 'WalletConnect & more' : 'Not installed — click to install'}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-function doEmailLogin() {
-  const email = document.getElementById('emailInp').value.trim();
-  if (!email || !email.includes('@')) { showToast('Enter a valid email', true); return; }
-  showToast('Magic link sent to ' + email);
-  document.getElementById('emailInp').value = '';
-  closeWalletModal();
-}
-
-function openWalletModal() {
-  renderWalletOptions();
-  document.getElementById('walletModal').classList.add('show');
-}
-
-function closeWalletModal() {
-  document.getElementById('walletModal').classList.remove('show');
-}
-
-async function doConnect(walletName, isInstalled) {
-  const optEl = document.querySelector(`[data-wallet="${walletName}"]`);
-  
-  if (!isInstalled) {
-    const urls = {
-      'Phantom': 'https://phantom.app/download',
-      'Solflare': 'https://solflare.com/download',
-      'Backpack': 'https://backpack.app/download',
-      'Coinbase Wallet': 'https://www.coinbase.com/wallet/downloads'
-    };
-    showToast(`Redirecting to ${walletName} download page...`);
-    setTimeout(() => window.open(urls[walletName], '_blank'), 1000);
-    return;
-  }
-
-  if (optEl) {
-    optEl.classList.add('checking');
-  }
-
-  try {
-    let provider = null;
-    let pubkey = null;
-
-    if (walletName === 'Phantom' && window.solana?.isPhantom) {
-      const resp = await window.solana.connect();
-      pubkey = resp.publicKey.toString();
-      provider = window.solana;
-    } else if (walletName === 'Solflare' && window.solflare) {
-      await window.solflare.connect();
-      pubkey = window.solflare.publicKey.toString();
-      provider = window.solflare;
-    } else if (walletName === 'Backpack' && window.backpack) {
-      const resp = await window.backpack.connect();
-      pubkey = resp.publicKey.toString();
-      provider = window.backpack;
-    } else if (walletName === 'Coinbase Wallet' && window.coinbaseSolana) {
-      const resp = await window.coinbaseSolana.connect();
-      pubkey = resp.publicKey.toString();
-      provider = window.coinbaseSolana;
-    } else {
-      throw new Error('Wallet not available');
-    }
-
-    walletPubkey = pubkey;
-    walletProvider = provider;
+// wallet connect / disconnect listener
+solConnect.onWalletChange((adapter) => {
+  if (adapter && adapter.publicKey) {
     walletConnected = true;
-
-    const short = pubkey.slice(0,4) + '...' + pubkey.slice(-4);
+    walletPubkey    = adapter.publicKey.toString();
+    walletProvider  = adapter;
+    const short = walletPubkey.slice(0,4) + '...' + walletPubkey.slice(-4);
     const btn = document.getElementById('cwBtn');
     btn.textContent = '● ' + short;
     btn.classList.add('connected');
     btn.onclick = disconnectWallet;
-
-    closeWalletModal();
-    showToast(`✓ ${walletName} connected!`);
+    showToast('✓ ' + adapter.name + ' connected!');
     refreshBtn();
     loadBalances();
-
-  } catch(e) {
-    console.error('Connection error:', e);
-    showToast(e.message?.includes('User rejected') ? 'Connection cancelled' : 'Connection failed', true);
-  } finally {
-    if (optEl) {
-      optEl.classList.remove('checking');
-    }
+  } else {
+    walletConnected = false;
+    walletPubkey    = null;
+    walletProvider  = null;
+    const btn = document.getElementById('cwBtn');
+    btn.textContent = '🔗 Connect Wallet';
+    btn.classList.remove('connected');
+    btn.onclick = openWalletModal;
+    document.getElementById('inBal').textContent = 'Balance: --';
+    document.getElementById('outBal').textContent = 'Balance: --';
+    showToast('Wallet disconnected');
+    refreshBtn();
   }
-}
+});
+
+function openWalletModal()  { solConnect.openMenu(); }
+function closeWalletModal() {}
 
 async function disconnectWallet() {
-  if (walletProvider?.disconnect) {
-    try {
-      await walletProvider.disconnect();
-    } catch(e) {}
-  }
-  
-  walletConnected = false;
-  walletPubkey = null;
-  walletProvider = null;
-  
-  const btn = document.getElementById('cwBtn');
-  btn.textContent = '🔗 Connect Wallet';
-  btn.classList.remove('connected');
-  btn.onclick = openWalletModal;
-  
-  document.getElementById('inBal').textContent = 'Balance: --';
-  document.getElementById('outBal').textContent = 'Balance: --';
-  
-  showToast('Wallet disconnected');
-  refreshBtn();
+  try { await walletProvider?.disconnect?.(); } catch(e) {}
 }
 
 async function loadBalances() {
@@ -1136,9 +1002,7 @@ function showToast(msg, isErr=false) {
 
 refreshBtn();
 
-document.getElementById('walletModal').addEventListener('click', e => {
-  if (e.target.id === 'walletModal') closeWalletModal();
-});
+// walletModal removed — SolanaConnectLight handles its own modal
 document.getElementById('slipModal').addEventListener('click', e => {
   if (e.target.id === 'slipModal') closeSlipModal();
 });
